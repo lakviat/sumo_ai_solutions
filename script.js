@@ -16,6 +16,11 @@
   const revealElements = Array.from(document.querySelectorAll("[data-reveal]"));
   const parallaxElements = Array.from(document.querySelectorAll("[data-parallax-depth]"));
   const rotatingItems = Array.from(document.querySelectorAll("[data-rotate-item]"));
+  const openConsultationButtons = Array.from(document.querySelectorAll("[data-open-consultation]"));
+  const consultationModal = document.getElementById("consultationModal");
+  const closeConsultationButtons = Array.from(document.querySelectorAll("[data-close-consultation]"));
+  const consultationForm = document.getElementById("consultationForm");
+  const consultationStatus = document.getElementById("consultationStatus");
   const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const coarsePointerQuery = window.matchMedia("(pointer: coarse)");
 
@@ -46,6 +51,7 @@
     rotationTimerId: 0,
     activeHighlightIndex: 0
   };
+  const defaultConsultationStatus = consultationStatus ? consultationStatus.textContent : "";
 
   function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
@@ -196,8 +202,8 @@
       pointerRadius
     );
 
-    pointerGradient.addColorStop(0, "rgba(188, 240, 255, 0.12)");
-    pointerGradient.addColorStop(0.34, "rgba(116, 186, 255, 0.08)");
+    pointerGradient.addColorStop(0, "rgba(206, 244, 255, 0.15)");
+    pointerGradient.addColorStop(0.34, "rgba(140, 198, 255, 0.1)");
     pointerGradient.addColorStop(1, "rgba(11, 16, 32, 0)");
 
     ctx.fillStyle = pointerGradient;
@@ -214,7 +220,7 @@
       state.width * 0.32
     );
 
-    ambientGradient.addColorStop(0, "rgba(100, 214, 255, 0.08)");
+    ambientGradient.addColorStop(0, "rgba(120, 228, 255, 0.11)");
     ambientGradient.addColorStop(1, "rgba(11, 16, 32, 0)");
 
     ctx.fillStyle = ambientGradient;
@@ -277,7 +283,7 @@
 
       ctx.beginPath();
       ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(191, 231, 255, " + (particle.alpha + influence * 0.18) + ")";
+      ctx.fillStyle = "rgba(211, 238, 255, " + (particle.alpha + influence * 0.18) + ")";
       ctx.fill();
     }
   }
@@ -310,7 +316,7 @@
 
       ctx.beginPath();
       ctx.arc(drawX, drawY, radius, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(188, 210, 245, " + alpha + ")";
+      ctx.fillStyle = "rgba(210, 226, 250, " + alpha + ")";
       ctx.fill();
     }
   }
@@ -465,6 +471,49 @@
     initHighlightRotation();
   }
 
+  function openConsultationModal() {
+    if (!consultationModal) {
+      return;
+    }
+
+    consultationModal.hidden = false;
+    document.body.classList.add("is-modal-open");
+
+    if (consultationStatus) {
+      consultationStatus.textContent = defaultConsultationStatus;
+      consultationStatus.classList.remove("is-success");
+    }
+
+    const firstInput = consultationModal.querySelector("input, textarea");
+
+    if (firstInput) {
+      window.setTimeout(function () {
+        firstInput.focus();
+      }, 40);
+    }
+  }
+
+  function closeConsultationModal() {
+    if (!consultationModal) {
+      return;
+    }
+
+    consultationModal.hidden = true;
+    document.body.classList.remove("is-modal-open");
+  }
+
+  function handleConsultationSubmit(event) {
+    event.preventDefault();
+
+    if (!consultationStatus) {
+      return;
+    }
+
+    consultationStatus.textContent =
+      "Consultation request captured in the frontend. The upload and email workflow will be connected when your Google Apps Script endpoint is added.";
+    consultationStatus.classList.add("is-success");
+  }
+
   function handleResize() {
     updateCanvasSize();
 
@@ -504,6 +553,12 @@
     startAnimation();
   }
 
+  function handleKeyDown(event) {
+    if (event.key === "Escape" && consultationModal && !consultationModal.hidden) {
+      closeConsultationModal();
+    }
+  }
+
   function addMediaChangeListener(query, handler) {
     if (typeof query.addEventListener === "function") {
       query.addEventListener("change", handler);
@@ -517,11 +572,24 @@
   initHighlightRotation();
   startAnimation();
 
+  for (let index = 0; index < openConsultationButtons.length; index += 1) {
+    openConsultationButtons[index].addEventListener("click", openConsultationModal);
+  }
+
+  for (let index = 0; index < closeConsultationButtons.length; index += 1) {
+    closeConsultationButtons[index].addEventListener("click", closeConsultationModal);
+  }
+
+  if (consultationForm) {
+    consultationForm.addEventListener("submit", handleConsultationSubmit);
+  }
+
   window.addEventListener("resize", handleResize);
   window.addEventListener("pointermove", handlePointerMove, { passive: true });
   window.addEventListener("pointerdown", handlePointerDown, { passive: true });
   window.addEventListener("pointerleave", clearPointer);
   window.addEventListener("blur", clearPointer);
+  window.addEventListener("keydown", handleKeyDown);
   document.addEventListener("mouseleave", clearPointer);
   document.addEventListener("visibilitychange", handleVisibilityChange);
   addMediaChangeListener(reducedMotionQuery, handleMotionPreferenceChange);

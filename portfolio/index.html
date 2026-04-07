@@ -3,11 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="author" content="SUMO AI Solutions">
+  <meta name="theme-color" content="#16315b">
   <meta
     name="description"
-    content="Explore upcoming portfolio work from SUMO AI Solutions across websites, mobile apps, AI integrations, consulting, and automation systems."
+    content="Explore portfolio previews from SUMO AI Solutions across websites, web applications, mobile apps, AI automation, AI business integration, IT consulting, technical delivery, and recruiting support."
   >
-  <title>SUMO AI Solutions | Portfolio</title>
+  <meta
+    name="keywords"
+    content="SUMO AI Solutions portfolio, website portfolio, web application portfolio, AI automation portfolio, AI integration case studies, consulting case studies, IT solutions portfolio, mobile app portfolio, custom software portfolio, digital product portfolio, automation systems portfolio, technical delivery portfolio"
+  >
+  <link rel="canonical" href="https://sumoaisolutions.com/portfolio/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SUMO AI Solutions">
+  <meta property="og:title" content="SUMO AI Solutions Portfolio | Websites, Web Apps, AI Systems">
+  <meta
+    property="og:description"
+    content="Portfolio previews for websites, web applications, mobile apps, AI systems, consulting work, and technical delivery."
+  >
+  <meta property="og:url" content="https://sumoaisolutions.com/portfolio/">
+  <meta property="og:image" content="https://sumoaisolutions.com/assets/sketches/sumo-banner.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SUMO AI Solutions Portfolio | Websites, Web Apps, AI Systems">
+  <meta
+    name="twitter:description"
+    content="Portfolio previews for websites, web applications, mobile apps, AI automation systems, consulting work, and technical delivery."
+  >
+  <meta name="twitter:image" content="https://sumoaisolutions.com/assets/sketches/sumo-banner.svg">
+  <title>SUMO AI Solutions Portfolio | Websites, Web Apps, AI Systems</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -15,6 +39,41 @@
     rel="stylesheet"
   >
   <link rel="stylesheet" href="../style.css">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "CollectionPage",
+          "@id": "https://sumoaisolutions.com/portfolio/#page",
+          "url": "https://sumoaisolutions.com/portfolio/",
+          "name": "SUMO AI Solutions Portfolio",
+          "description": "Portfolio previews and future case studies for websites, web apps, mobile apps, AI integration, automation systems, IT consulting, and technical delivery.",
+          "isPartOf": {
+            "@type": "WebSite",
+            "@id": "https://sumoaisolutions.com/#website"
+          }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://sumoaisolutions.com/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Portfolio",
+              "item": "https://sumoaisolutions.com/portfolio/"
+            }
+          ]
+        }
+      ]
+    }
+  </script>
 </head>
 <body>
   <canvas class="dot-grid" id="dotGrid" aria-hidden="true"></canvas>
@@ -29,6 +88,7 @@
       <nav class="site-nav" aria-label="Primary">
         <a href="../">Home</a>
         <a href="../#services">Services</a>
+        <a href="./">Portfolio</a>
         <a href="../#contact">Contact</a>
       </nav>
     </header>
@@ -45,35 +105,210 @@
           <div class="hero-copy-shell" data-reveal>
             <div class="hero-copy" data-parallax-depth="12">
               <p class="eyebrow">Portfolio</p>
-              <h1>Work examples are being prepared.</h1>
-              <h2>Case studies and selected delivery examples will live here.</h2>
+              <h1>Work previews designed to feel alive, premium, and product-led.</h1>
+              <h2>Templates and case study slots are ready while the real projects are being prepared.</h2>
               <p class="hero-text">
-                This portfolio route is already wired for GitHub Pages deployment and will expand to include
-                websites, mobile apps, AI integrations, consulting engagements, and business system improvements.
+                This page is intentionally designed as a dynamic portfolio shell. For now, each card acts as a
+                polished placeholder for future websites, apps, AI systems, consulting work, and delivery case studies.
               </p>
 
               <div class="hero-actions">
-                <a class="button button-primary" href="../#contact">Discuss a Project</a>
+                <button class="button button-primary" type="button" data-open-consultation>Book a Consultation</button>
                 <a class="button button-secondary" href="../">Back to Home</a>
               </div>
             </div>
           </div>
 
           <div class="hero-panel-shell" data-reveal style="--reveal-delay: 160ms;">
-            <aside class="hero-panel glass-panel" data-parallax-depth="20">
-              <div class="metric-card">
-                <span class="metric-label">Planned Categories</span>
-                <strong>Websites, mobile products, AI systems, consulting, and delivery support.</strong>
-                <p>
-                  As the portfolio grows, this page will showcase product builds, automation outcomes,
-                  modernization work, and implementation support across multiple client types.
-                </p>
+            <div class="portfolio-hero-showcase" data-parallax-depth="20" aria-hidden="true">
+              <div class="showcase-sky"></div>
+              <div class="showcase-card showcase-card-back">
+                <div class="showcase-browser-top">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                <div class="showcase-card-fill showcase-card-fill-soft"></div>
               </div>
-            </aside>
+              <div class="showcase-card showcase-card-mid">
+                <div class="showcase-browser-top">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                <div class="showcase-card-fill showcase-card-fill-ui"></div>
+              </div>
+              <div class="showcase-card showcase-card-front">
+                <div class="showcase-browser-top">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                <div class="showcase-card-fill showcase-card-fill-sunset"></div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
+
+      <section class="section portfolio-gallery-section">
+        <div class="portfolio-gallery-head" data-reveal>
+          <p class="eyebrow">Portfolio Grid</p>
+          <h2>Hover-ready template slots for upcoming websites, apps, and AI builds.</h2>
+          <p>
+            These cards are placeholders for future project pages. The interaction and art direction are already in place,
+            so real websites and case studies can be dropped in later without rebuilding the experience.
+          </p>
+        </div>
+
+        <div class="portfolio-grid">
+          <article class="portfolio-template-card template-azure glass-panel" data-reveal style="--reveal-delay: 40ms;">
+            <div class="template-stack">
+              <div class="template-layer layer-back"></div>
+              <div class="template-layer layer-mid"></div>
+              <div class="template-layer layer-front"></div>
+            </div>
+            <div class="template-copy">
+              <span class="card-tag">Website</span>
+              <h3>Executive Landing Page</h3>
+              <p>Page coming soon. This slot is reserved for a polished business website or premium campaign page.</p>
+            </div>
+          </article>
+
+          <article class="portfolio-template-card template-sunset glass-panel" data-reveal style="--reveal-delay: 80ms;">
+            <div class="template-stack">
+              <div class="template-layer layer-back"></div>
+              <div class="template-layer layer-mid"></div>
+              <div class="template-layer layer-front"></div>
+            </div>
+            <div class="template-copy">
+              <span class="card-tag">Web App</span>
+              <h3>Operations Dashboard</h3>
+              <p>Page coming soon. Designed for custom workflow software, dashboards, and internal business systems.</p>
+            </div>
+          </article>
+
+          <article class="portfolio-template-card template-indigo glass-panel" data-reveal style="--reveal-delay: 120ms;">
+            <div class="template-stack">
+              <div class="template-layer layer-back"></div>
+              <div class="template-layer layer-mid"></div>
+              <div class="template-layer layer-front"></div>
+            </div>
+            <div class="template-copy">
+              <span class="card-tag">AI System</span>
+              <h3>Automation Workspace</h3>
+              <p>Page coming soon. Reserved for AI copilots, workflow automation, and intelligent operational tooling.</p>
+            </div>
+          </article>
+
+          <article class="portfolio-template-card template-skyline glass-panel" data-reveal style="--reveal-delay: 160ms;">
+            <div class="template-stack">
+              <div class="template-layer layer-back"></div>
+              <div class="template-layer layer-mid"></div>
+              <div class="template-layer layer-front"></div>
+            </div>
+            <div class="template-copy">
+              <span class="card-tag">Mobile</span>
+              <h3>Product App Preview</h3>
+              <p>Page coming soon. This will support future iOS and Android product examples.</p>
+            </div>
+          </article>
+
+          <article class="portfolio-template-card template-aurora glass-panel" data-reveal style="--reveal-delay: 200ms;">
+            <div class="template-stack">
+              <div class="template-layer layer-back"></div>
+              <div class="template-layer layer-mid"></div>
+              <div class="template-layer layer-front"></div>
+            </div>
+            <div class="template-copy">
+              <span class="card-tag">Consulting</span>
+              <h3>Technical Delivery Case Study</h3>
+              <p>Page coming soon. Reserved for architecture, modernization, and embedded delivery examples.</p>
+            </div>
+          </article>
+
+          <article class="portfolio-template-card template-signal glass-panel" data-reveal style="--reveal-delay: 240ms;">
+            <div class="template-stack">
+              <div class="template-layer layer-back"></div>
+              <div class="template-layer layer-mid"></div>
+              <div class="template-layer layer-front"></div>
+            </div>
+            <div class="template-copy">
+              <span class="card-tag">Recruiting</span>
+              <h3>IT Talent Support Page</h3>
+              <p>Page coming soon. This slot will showcase recruiting and team augmentation support in the IT sphere.</p>
+            </div>
+          </article>
+        </div>
+      </section>
     </main>
+  </div>
+
+  <div class="consultation-modal" id="consultationModal" hidden>
+    <div class="consultation-overlay" data-close-consultation></div>
+    <div class="consultation-dialog glass-panel" role="dialog" aria-modal="true" aria-labelledby="consultationTitle">
+      <button class="consultation-close" type="button" aria-label="Close consultation form" data-close-consultation>&times;</button>
+
+      <div class="consultation-head">
+        <p class="eyebrow">Book a Consultation</p>
+        <h2 id="consultationTitle">Tell us what you are trying to build.</h2>
+        <p>
+          Share the project details, reference links, and any requirements you already have.
+          This frontend form is ready for your Google Apps Script integration.
+        </p>
+      </div>
+
+      <form class="consultation-form" id="consultationForm">
+        <div class="form-grid">
+          <label class="form-field">
+            <span>First Name</span>
+            <input type="text" name="first_name" placeholder="John" required>
+          </label>
+          <label class="form-field">
+            <span>Last Name</span>
+            <input type="text" name="last_name" placeholder="Smith" required>
+          </label>
+          <label class="form-field">
+            <span>Email</span>
+            <input type="email" name="email" placeholder="john@company.com" required>
+          </label>
+          <label class="form-field">
+            <span>Phone Number</span>
+            <input type="tel" name="phone" placeholder="+1 (555) 123-4567">
+          </label>
+          <label class="form-field">
+            <span>WhatsApp</span>
+            <input type="tel" name="whatsapp" placeholder="+1 (555) 987-6543">
+          </label>
+          <label class="form-field">
+            <span>Company or Organization</span>
+            <input type="text" name="company" placeholder="Your business or team">
+          </label>
+          <label class="form-field form-field-full">
+            <span>What are you trying to accomplish?</span>
+            <textarea name="project_description" rows="6" placeholder="Describe the website, app, AI automation, consulting, recruiting, or technical system you want to build." required></textarea>
+          </label>
+          <label class="form-field form-field-full">
+            <span>Reference Links</span>
+            <textarea name="reference_links" rows="3" placeholder="Paste websites, apps, designs, or examples you want us to review."></textarea>
+          </label>
+          <label class="form-field form-field-full">
+            <span>Attachments</span>
+            <input type="file" name="attachments" multiple accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.webp,.zip,.fig">
+            <small>Attach briefs, screenshots, requirement docs, or wireframes.</small>
+          </label>
+        </div>
+
+        <div class="consultation-actions">
+          <button class="button button-primary" type="submit">Prepare Consultation Request</button>
+          <button class="button button-secondary" type="button" data-close-consultation>Cancel</button>
+        </div>
+
+        <p class="consultation-status" id="consultationStatus" aria-live="polite">
+          Submission wiring is not connected yet. This form is ready for your Google Apps Script integration.
+        </p>
+      </form>
+    </div>
   </div>
 
   <script src="../script.js"></script>
