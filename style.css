@@ -1024,6 +1024,33 @@ button.button {
   min-height: 8rem;
 }
 
+.form-field input[type="file"] {
+  padding: 0.42rem;
+  border-style: dashed;
+  background:
+    linear-gradient(180deg, rgba(15, 25, 44, 0.92), rgba(10, 18, 34, 0.9)),
+    rgba(9, 15, 28, 0.78);
+  cursor: pointer;
+}
+
+.form-field input[type="file"]::file-selector-button {
+  margin-right: 0.9rem;
+  padding: 0.7rem 0.95rem;
+  border: 1px solid rgba(159, 220, 255, 0.26);
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(149, 229, 255, 0.22), rgba(119, 167, 255, 0.18));
+  color: var(--cyan-strong);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 180ms ease, background-color 180ms ease, transform 180ms ease;
+}
+
+.form-field input[type="file"]::file-selector-button:hover {
+  border-color: rgba(188, 237, 255, 0.38);
+  background: linear-gradient(135deg, rgba(160, 234, 255, 0.28), rgba(128, 176, 255, 0.22));
+}
+
 .form-field small {
   color: var(--muted);
   font-size: 0.85rem;
@@ -1482,6 +1509,13 @@ body.is-modal-open {
   .site-nav a {
     padding: 0.3rem 0.36rem;
     font-size: 0.78rem;
+  }
+
+  .form-field input[type="file"]::file-selector-button {
+    display: block;
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 0.7rem;
   }
 
   .hero {

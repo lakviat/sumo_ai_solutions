@@ -222,10 +222,7 @@
     const lastName = String(formData.get("last_name") || "").trim();
     const email = String(formData.get("email") || "").trim();
     const phone = String(formData.get("phone") || "").trim();
-    const whatsapp = String(formData.get("whatsapp") || "").trim();
-    const company = String(formData.get("company") || "").trim();
     const projectDescription = String(formData.get("project_description") || "").trim();
-    const referenceLinks = String(formData.get("reference_links") || "").trim();
     const files = Array.from(
       (consultationForm.querySelector('input[name="attachments"]') || {}).files || []
     );
@@ -256,11 +253,8 @@
       fullName: (firstName + " " + lastName).trim(),
       email: email,
       phone: phone,
-      whatsapp: whatsapp,
-      company: company,
       message: projectDescription,
       projectDescription: projectDescription,
-      referenceLinks: referenceLinks,
       attachments: await serializeAttachments(files)
     };
   }

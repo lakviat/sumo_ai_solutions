@@ -157,12 +157,9 @@ function buildSubmissionRecord_(payload, attachmentInfos) {
     firstName: firstName,
     lastName: lastName,
     fullName: fullName,
-    company: String(payload.company || "N/A").trim(),
     email: String(payload.email || "").trim(),
     phone: String(payload.phone || "N/A").trim(),
-    whatsapp: String(payload.whatsapp || "N/A").trim(),
     message: String(payload.message || payload.projectDescription || "").trim(),
-    referenceLinks: String(payload.referenceLinks || "N/A").trim(),
     attachments: attachmentInfos || []
   };
 }
@@ -185,11 +182,8 @@ function sendSubmissionEmail_(submission) {
     "<p><strong>First name:</strong> " + escapeHtml_(submission.firstName) + "</p>" +
     "<p><strong>Last name:</strong> " + escapeHtml_(submission.lastName) + "</p>" +
     "<p><strong>Full name:</strong> " + escapeHtml_(submission.fullName) + "</p>" +
-    "<p><strong>Company:</strong> " + escapeHtml_(submission.company) + "</p>" +
     "<p><strong>Email:</strong> " + escapeHtml_(submission.email) + "</p>" +
     "<p><strong>Phone:</strong> " + escapeHtml_(submission.phone) + "</p>" +
-    "<p><strong>WhatsApp:</strong> " + escapeHtml_(submission.whatsapp) + "</p>" +
-    "<p><strong>Reference links:</strong><br>" + escapeHtml_(submission.referenceLinks) + "</p>" +
     "<p><strong>Project details:</strong><br>" + escapeHtml_(submission.message) + "</p>" +
     "<h3>Attachments (Saved to Drive):</h3>" +
     fileListHtml +
@@ -220,11 +214,8 @@ function appendSubmissionToSheet_(submission) {
     submission.firstName,
     submission.lastName,
     submission.fullName,
-    submission.company,
     submission.email,
     submission.phone,
-    submission.whatsapp,
-    submission.referenceLinks,
     submission.message,
     submission.attachments
       .map(function (attachment) {
