@@ -1,0 +1,66 @@
+<svg width="1600" height="520" viewBox="0 0 1600 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="120" y1="40" x2="1500" y2="460" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#101A36"/>
+      <stop offset="1" stop-color="#08101F"/>
+    </linearGradient>
+    <radialGradient id="glowA" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(280 170) rotate(90) scale(220 340)">
+      <stop stop-color="#7BA7FF" stop-opacity="0.26"/>
+      <stop offset="1" stop-color="#7BA7FF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowB" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1250 360) rotate(90) scale(220 340)">
+      <stop stop-color="#77EBFF" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#77EBFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="accent" x1="140" y1="120" x2="360" y2="340" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#CCF7FF"/>
+      <stop offset="1" stop-color="#7FAEFF"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="520" rx="36" fill="url(#bg)"/>
+  <rect width="1600" height="520" rx="36" fill="url(#glowA)"/>
+  <rect width="1600" height="520" rx="36" fill="url(#glowB)"/>
+
+  <g opacity="0.28" fill="#B7D9FF">
+    <circle cx="78" cy="68" r="1.4"/>
+    <circle cx="132" cy="102" r="1.2"/>
+    <circle cx="186" cy="78" r="1.1"/>
+    <circle cx="240" cy="112" r="1.2"/>
+    <circle cx="294" cy="86" r="1.1"/>
+    <circle cx="348" cy="118" r="1.3"/>
+    <circle cx="402" cy="90" r="1.2"/>
+    <circle cx="1456" cy="82" r="1.4"/>
+    <circle cx="1408" cy="116" r="1.2"/>
+    <circle cx="1362" cy="86" r="1.1"/>
+    <circle cx="1316" cy="120" r="1.2"/>
+    <circle cx="1270" cy="94" r="1.1"/>
+    <circle cx="1224" cy="124" r="1.3"/>
+    <circle cx="1178" cy="98" r="1.2"/>
+  </g>
+
+  <g transform="translate(130 118)">
+    <rect x="0" y="0" width="156" height="156" rx="34" fill="#0C1427" stroke="#2E466E" stroke-width="2"/>
+    <path d="M36 78L78 36L120 78L78 120L36 78Z" stroke="url(#accent)" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M78 24V132" stroke="url(#accent)" stroke-width="10" stroke-linecap="round"/>
+    <path d="M24 78H132" stroke="#6EE7FF" stroke-opacity="0.28" stroke-width="2" stroke-dasharray="5 7"/>
+    <circle cx="78" cy="78" r="7" fill="#C8F8FF"/>
+  </g>
+
+  <g transform="translate(360 116)">
+    <text x="0" y="44" fill="#C3F6FF" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="4">SUMO AI SOLUTIONS</text>
+    <text x="0" y="138" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="800">Digital products, AI</text>
+    <text x="0" y="220" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="800">automation, IT delivery,</text>
+    <text x="0" y="302" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="800">consulting, and recruiting.</text>
+    <text x="0" y="370" fill="#A7B8D9" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="500">A premium technology partner for modern businesses and enterprise teams.</text>
+  </g>
+
+  <g transform="translate(1262 144)">
+    <rect width="214" height="104" rx="24" fill="#10192E" stroke="#263C63"/>
+    <text x="22" y="34" fill="#C5F6FF" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" letter-spacing="2.2">SYSTEM PANEL</text>
+    <text x="22" y="62" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Build</text>
+    <text x="82" y="62" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">•</text>
+    <text x="102" y="62" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Automate</text>
+    <text x="22" y="88" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Advise • Recruit</text>
+  </g>
+</svg>

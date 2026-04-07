@@ -1,0 +1,34 @@
+<svg width="1200" height="720" viewBox="0 0 1200 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="720" rx="32" fill="#0C1427"/>
+  <text x="52" y="76" fill="#C8F8FF" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" letter-spacing="3">AI SOLUTION SKETCH</text>
+  <text x="52" y="128" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="800">AI Systems &amp; Ops Layer</text>
+  <text x="52" y="166" fill="#AAB8D5" font-family="Arial, Helvetica, sans-serif" font-size="24">A high-level concept for business systems monitoring, triage, and action support.</text>
+
+  <rect x="78" y="242" width="226" height="160" rx="26" fill="#10192E" stroke="#29425F"/>
+  <text x="112" y="290" fill="#C8F8FF" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">SYSTEM INPUTS</text>
+  <text x="112" y="332" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Website</text>
+  <text x="112" y="368" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Apps</text>
+  <text x="112" y="404" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Ops tools</text>
+
+  <rect x="486" y="200" width="228" height="244" rx="30" fill="#16233F" stroke="#4F73AA" stroke-width="2"/>
+  <text x="520" y="246" fill="#C8F8FF" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">AI CONTROL LAYER</text>
+  <text x="520" y="294" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Observe</text>
+  <text x="520" y="332" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Detect risk</text>
+  <text x="520" y="370" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Recommend</text>
+  <text x="520" y="408" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Escalate</text>
+
+  <rect x="896" y="242" width="226" height="160" rx="26" fill="#10192E" stroke="#29425F"/>
+  <text x="930" y="290" fill="#C8F8FF" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">BUSINESS OUTPUTS</text>
+  <text x="930" y="332" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Alerts</text>
+  <text x="930" y="368" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Actions</text>
+  <text x="930" y="404" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Insights</text>
+
+  <path d="M304 322H470" stroke="#7EE7FF" stroke-width="6" stroke-linecap="round"/>
+  <path d="M714 322H880" stroke="#7EE7FF" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="386" cy="322" r="9" fill="#CBF8FF"/>
+  <circle cx="798" cy="322" r="9" fill="#CBF8FF"/>
+
+  <rect x="280" y="508" width="640" height="120" rx="28" fill="#0E172A" stroke="#2A4165"/>
+  <text x="314" y="558" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700">Examples</text>
+  <text x="314" y="602" fill="#AAB8D5" font-family="Arial, Helvetica, sans-serif" font-size="26">System health summaries • exception routing • AI-assisted operational oversight</text>
+</svg>

@@ -1,0 +1,17 @@
+<svg width="720" height="720" viewBox="0 0 720 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="720" height="720" rx="44" fill="#0C1427"/>
+  <rect x="48" y="48" width="624" height="624" rx="36" stroke="#243A60" stroke-width="2"/>
+  <path d="M360 150L500 290L360 430L220 290L360 150Z" stroke="#D0FAFF" stroke-width="16" stroke-linejoin="round"/>
+  <path d="M360 120V460" stroke="#8EEBFF" stroke-width="16" stroke-linecap="round"/>
+  <path d="M170 290H550" stroke="#4D77B7" stroke-width="2" stroke-dasharray="8 10"/>
+  <path d="M270 200L360 290L450 200" stroke="#7FAEFF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M270 380L360 290L450 380" stroke="#7FAEFF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="360" cy="290" r="14" fill="#C9F8FF"/>
+  <circle cx="250" cy="180" r="6" fill="#6EE7FF" fill-opacity="0.65"/>
+  <circle cx="470" cy="180" r="6" fill="#6EE7FF" fill-opacity="0.65"/>
+  <circle cx="250" cy="400" r="6" fill="#6EE7FF" fill-opacity="0.65"/>
+  <circle cx="470" cy="400" r="6" fill="#6EE7FF" fill-opacity="0.65"/>
+  <text x="96" y="558" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="800">Concept A</text>
+  <text x="96" y="604" fill="#AAB9D6" font-family="Arial, Helvetica, sans-serif" font-size="24">Tsuka Grid</text>
+  <text x="96" y="640" fill="#AAB9D6" font-family="Arial, Helvetica, sans-serif" font-size="24">samurai handle wrap + AI spine</text>
+</svg>

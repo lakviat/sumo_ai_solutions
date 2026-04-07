@@ -1,0 +1,13 @@
+<svg width="720" height="720" viewBox="0 0 720 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="720" height="720" rx="44" fill="#0B1120"/>
+  <circle cx="360" cy="288" r="166" stroke="#29415F" stroke-width="2"/>
+  <circle cx="360" cy="288" r="132" fill="#101A31" stroke="#35517B" stroke-width="3"/>
+  <path d="M360 152L450 242L360 332L270 242L360 152Z" stroke="#D8FBFF" stroke-width="14" stroke-linejoin="round"/>
+  <path d="M360 244L450 334L360 424L270 334L360 244Z" stroke="#8FDFFF" stroke-width="14" stroke-linejoin="round"/>
+  <path d="M360 120V454" stroke="#89B7FF" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="360" cy="288" r="10" fill="#C9F8FF"/>
+  <path d="M214 288H506" stroke="#5279B5" stroke-width="2" stroke-dasharray="7 9"/>
+  <text x="96" y="558" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="800">Concept B</text>
+  <text x="96" y="604" fill="#AAB9D6" font-family="Arial, Helvetica, sans-serif" font-size="24">Tsuka Crest</text>
+  <text x="96" y="640" fill="#AAB9D6" font-family="Arial, Helvetica, sans-serif" font-size="24">emblem direction for brand seal or mark</text>
+</svg>

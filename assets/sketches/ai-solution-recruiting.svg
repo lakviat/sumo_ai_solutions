@@ -1,0 +1,30 @@
+<svg width="1200" height="720" viewBox="0 0 1200 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="720" rx="32" fill="#0B1120"/>
+  <text x="52" y="76" fill="#C8F8FF" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" letter-spacing="3">AI SOLUTION SKETCH</text>
+  <text x="52" y="128" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="800">IT Recruiting Support</text>
+  <text x="52" y="166" fill="#AAB8D5" font-family="Arial, Helvetica, sans-serif" font-size="24">AI-assisted sourcing, screening, role alignment, and recruiter handoff.</text>
+
+  <rect x="70" y="244" width="210" height="122" rx="24" fill="#11192D" stroke="#29405F"/>
+  <text x="102" y="292" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Candidate pool</text>
+
+  <rect x="350" y="244" width="230" height="122" rx="24" fill="#15213C" stroke="#4F73AA" stroke-width="2"/>
+  <text x="382" y="286" fill="#C8F8FF" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">AI SCREENING</text>
+  <text x="382" y="326" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Skills match</text>
+
+  <rect x="650" y="244" width="230" height="122" rx="24" fill="#15213C" stroke="#4F73AA" stroke-width="2"/>
+  <text x="682" y="286" fill="#C8F8FF" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">AI ROLE FIT</text>
+  <text x="682" y="326" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Priority ranking</text>
+
+  <rect x="950" y="244" width="180" height="122" rx="24" fill="#11192D" stroke="#29405F"/>
+  <text x="982" y="286" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Recruiter</text>
+  <text x="982" y="326" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">review</text>
+
+  <path d="M280 306H334" stroke="#7EE7FF" stroke-width="6" stroke-linecap="round"/>
+  <path d="M580 306H634" stroke="#7EE7FF" stroke-width="6" stroke-linecap="round"/>
+  <path d="M880 306H934" stroke="#7EE7FF" stroke-width="6" stroke-linecap="round"/>
+
+  <rect x="214" y="468" width="772" height="150" rx="28" fill="#0E172A" stroke="#2A4165"/>
+  <text x="248" y="522" fill="#F5F8FF" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700">Use cases</text>
+  <text x="248" y="566" fill="#AAB8D5" font-family="Arial, Helvetica, sans-serif" font-size="26">Resume summarization • role-to-candidate matching • shortlist recommendations</text>
+  <text x="248" y="604" fill="#AAB8D5" font-family="Arial, Helvetica, sans-serif" font-size="26">screening support for software, infrastructure, product, and IT operations roles</text>
+</svg>
