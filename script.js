@@ -16,6 +16,7 @@
   const revealElements = Array.from(document.querySelectorAll("[data-reveal]"));
   const parallaxElements = Array.from(document.querySelectorAll("[data-parallax-depth]"));
   const rotatingItems = Array.from(document.querySelectorAll("[data-rotate-item]"));
+  const siteNavs = Array.from(document.querySelectorAll(".site-nav"));
   const openConsultationButtons = Array.from(document.querySelectorAll("[data-open-consultation]"));
   const consultationModal = document.getElementById("consultationModal");
   const closeConsultationButtons = Array.from(document.querySelectorAll("[data-close-consultation]"));
@@ -56,10 +57,11 @@
     frameInterval: 1000 / 36,
     reducedMotion: reducedMotionQuery.matches,
     coarsePointer: coarsePointerQuery.matches || window.innerWidth < 900,
-    mobileStaticBackground: false,
+    mobileAmbientMode: false,
     parallaxEnabled: false,
     points: [],
     particles: [],
+    ripples: [],
     pointer: {
       x: 0,
       y: 0,
@@ -70,7 +72,8 @@
     rafId: 0,
     lastFrameTime: 0,
     rotationTimerId: 0,
-    activeHighlightIndex: 0
+    activeHighlightIndex: 0,
+    touchFocusUntil: 0
   };
   const defaultConsultationStatus = consultationStatus ? consultationStatus.textContent : "";
   const defaultConsultationSubmitLabel = consultationSubmitButton ? consultationSubmitButton.textContent : "";
@@ -346,13 +349,13 @@
   function updateQuality() {
     state.reducedMotion = reducedMotionQuery.matches;
     state.coarsePointer = coarsePointerQuery.matches || window.innerWidth < 900;
-    state.mobileStaticBackground = state.coarsePointer;
-    state.spacing = state.coarsePointer ? 54 : 44;
-    state.baseRadius = state.coarsePointer ? 1.12 : 1.28;
-    state.activeRadius = state.coarsePointer ? 1.95 : 2.8;
-    state.influenceRadius = state.reducedMotion ? 0 : state.coarsePointer ? 92 : 170;
-    state.particleCount = state.reducedMotion ? 0 : state.coarsePointer ? 0 : 18;
-    state.frameInterval = state.coarsePointer ? 1000 / 24 : 1000 / 36;
+    state.mobileAmbientMode = state.coarsePointer && !state.reducedMotion;
+    state.spacing = state.mobileAmbientMode ? 58 : state.coarsePointer ? 54 : 44;
+    state.baseRadius = state.mobileAmbientMode ? 1.18 : state.coarsePointer ? 1.12 : 1.28;
+    state.activeRadius = state.mobileAmbientMode ? 2.18 : state.coarsePointer ? 1.95 : 2.8;
+    state.influenceRadius = state.reducedMotion ? 0 : state.mobileAmbientMode ? 128 : state.coarsePointer ? 92 : 170;
+    state.particleCount = state.reducedMotion ? 0 : state.mobileAmbientMode ? 0 : state.coarsePointer ? 0 : 18;
+    state.frameInterval = state.mobileAmbientMode ? 1000 / 14 : state.coarsePointer ? 1000 / 24 : 1000 / 36;
     state.parallaxEnabled = !state.reducedMotion && !state.coarsePointer;
   }
 
@@ -425,25 +428,66 @@
     }
   }
 
+  function getScrollProgress() {
+    const documentHeight = Math.max(
+      document.documentElement.scrollHeight,
+      document.body.scrollHeight
+    );
+    const maxScroll = Math.max(documentHeight - window.innerHeight, 1);
+
+    return clamp(window.scrollY / maxScroll, 0, 1);
+  }
+
   function getIdleTarget(time) {
+    if (state.mobileAmbientMode) {
+      const scrollProgress = getScrollProgress();
+
+      return {
+        x:
+          state.width * 0.5 +
+          Math.sin(time * 0.00022) * state.width * 0.16,
+        y:
+          state.height * (0.26 + scrollProgress * 0.2) +
+          Math.cos(time * 0.00019) * state.height * 0.09
+      };
+    }
+
     return {
       x: state.width * 0.66 + Math.sin(time * 0.00018) * state.width * (state.coarsePointer ? 0.04 : 0.08),
       y: state.height * 0.32 + Math.cos(time * 0.00022) * state.height * (state.coarsePointer ? 0.035 : 0.06)
     };
   }
 
-  function setPointer(x, y) {
-    if (state.reducedMotion || state.coarsePointer) {
+  function setPointer(x, y, force) {
+    if (state.reducedMotion || (state.coarsePointer && !force)) {
       return;
     }
 
     state.pointer.targetX = x;
     state.pointer.targetY = y;
     state.pointer.active = true;
+
+    if (state.mobileAmbientMode) {
+      state.touchFocusUntil = window.performance.now() + 1600;
+    }
   }
 
   function clearPointer() {
     state.pointer.active = false;
+  }
+
+  function addRipple(x, y) {
+    if (!state.mobileAmbientMode) {
+      return;
+    }
+
+    state.ripples.push({
+      x: x,
+      y: y,
+      radius: 12,
+      alpha: 0.18,
+      growth: 2.4
+    });
   }
 
   function updatePointer(time) {
@@ -455,6 +499,10 @@
       return;
     }
 
+    if (state.mobileAmbientMode && state.pointer.active && time > state.touchFocusUntil) {
+      state.pointer.active = false;
+    }
+
     if (!state.pointer.active) {
       const idleTarget = getIdleTarget(time);
 
@@ -462,12 +510,21 @@
       state.pointer.targetY = idleTarget.y;
     }
 
-    state.pointer.x = lerp(state.pointer.x, state.pointer.targetX, state.coarsePointer ? 0.04 : 0.09);
-    state.pointer.y = lerp(state.pointer.y, state.pointer.targetY, state.coarsePointer ? 0.04 : 0.09);
+    state.pointer.x = lerp(
+      state.pointer.x,
+      state.pointer.targetX,
+      state.mobileAmbientMode ? 0.06 : state.coarsePointer ? 0.04 : 0.09
+    );
+    state.pointer.y = lerp(
+      state.pointer.y,
+      state.pointer.targetY,
+      state.mobileAmbientMode ? 0.06 : state.coarsePointer ? 0.04 : 0.09
+    );
   }
 
   function drawAmbientGlow(time) {
-    const pointerRadius = state.coarsePointer ? 170 : 240;
+    const scrollProgress = getScrollProgress();
+    const pointerRadius = state.mobileAmbientMode ? 210 : state.coarsePointer ? 170 : 240;
     const pointerGradient = ctx.createRadialGradient(
       state.pointer.x,
       state.pointer.y,
@@ -477,8 +534,8 @@
       pointerRadius
     );
 
-    pointerGradient.addColorStop(0, "rgba(206, 244, 255, 0.15)");
-    pointerGradient.addColorStop(0.34, "rgba(140, 198, 255, 0.1)");
+    pointerGradient.addColorStop(0, state.mobileAmbientMode ? "rgba(223, 248, 255, 0.2)" : "rgba(206, 244, 255, 0.15)");
+    pointerGradient.addColorStop(0.34, state.mobileAmbientMode ? "rgba(157, 213, 255, 0.14)" : "rgba(140, 198, 255, 0.1)");
     pointerGradient.addColorStop(1, "rgba(11, 16, 32, 0)");
 
     ctx.fillStyle = pointerGradient;
@@ -495,11 +552,54 @@
       state.width * 0.32
     );
 
-    ambientGradient.addColorStop(0, "rgba(120, 228, 255, 0.11)");
+    ambientGradient.addColorStop(0, state.mobileAmbientMode ? "rgba(132, 234, 255, 0.14)" : "rgba(120, 228, 255, 0.11)");
     ambientGradient.addColorStop(1, "rgba(11, 16, 32, 0)");
 
     ctx.fillStyle = ambientGradient;
     ctx.fillRect(0, 0, state.width, state.height);
+
+    if (state.mobileAmbientMode) {
+      const sweepX = state.width * (0.22 + 0.56 * ((Math.sin(time * 0.00016) + 1) / 2));
+      const sweepY = state.height * (0.16 + scrollProgress * 0.46);
+      const sweepGradient = ctx.createRadialGradient(
+        sweepX,
+        sweepY,
+        0,
+        sweepX,
+        sweepY,
+        state.width * 0.22
+      );
+
+      sweepGradient.addColorStop(0, "rgba(173, 229, 255, 0.12)");
+      sweepGradient.addColorStop(0.55, "rgba(95, 168, 255, 0.06)");
+      sweepGradient.addColorStop(1, "rgba(11, 16, 32, 0)");
+
+      ctx.fillStyle = sweepGradient;
+      ctx.fillRect(0, 0, state.width, state.height);
+    }
+  }
+
+  function updateAndDrawRipples() {
+    if (!state.ripples.length) {
+      return;
+    }
+
+    for (let index = state.ripples.length - 1; index >= 0; index -= 1) {
+      const ripple = state.ripples[index];
+
+      ripple.radius += ripple.growth;
+      ripple.alpha *= 0.94;
+
+      ctx.beginPath();
+      ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(196, 236, 255, " + ripple.alpha + ")";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      if (ripple.alpha < 0.012) {
+        state.ripples.splice(index, 1);
+      }
+    }
   }
 
   function updateAndDrawParticles(time) {
@@ -575,23 +675,29 @@
         ? smoothstep(clamp(1 - distance / state.influenceRadius, 0, 1))
         : 0;
       const safeDistance = distance || 1;
-      const ambient = 0.03 + Math.sin(point.phase + timeWave) * 0.02;
-      const warp = influence * (state.coarsePointer ? 1.6 : 3.8);
+      const ambient = (state.mobileAmbientMode ? 0.05 : 0.03) + Math.sin(point.phase + timeWave) * (state.mobileAmbientMode ? 0.028 : 0.02);
+      const warp = influence * (state.mobileAmbientMode ? 2.4 : state.coarsePointer ? 1.6 : 3.8);
       const drawX = point.x - (dx / safeDistance) * warp;
       const drawY = point.y - (dy / safeDistance) * warp;
       const radius = state.baseRadius + (state.activeRadius - state.baseRadius) * influence;
-      const alpha = clamp(0.12 + ambient + influence * 0.54, 0.1, 0.86);
+      const alpha = clamp(
+        (state.mobileAmbientMode ? 0.15 : 0.12) + ambient + influence * (state.mobileAmbientMode ? 0.4 : 0.54),
+        0.1,
+        0.88
+      );
 
       if (influence > 0.28) {
         ctx.beginPath();
         ctx.arc(drawX, drawY, radius + influence * 1.4, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(150, 226, 255, " + (0.05 + influence * 0.14) + ")";
+        ctx.fillStyle = "rgba(154, 230, 255, " + (state.mobileAmbientMode ? 0.08 + influence * 0.16 : 0.05 + influence * 0.14) + ")";
         ctx.fill();
       }
 
       ctx.beginPath();
       ctx.arc(drawX, drawY, radius, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(210, 226, 250, " + alpha + ")";
+      ctx.fillStyle = state.mobileAmbientMode
+        ? "rgba(221, 236, 255, " + alpha + ")"
+        : "rgba(210, 226, 250, " + alpha + ")";
       ctx.fill();
     }
   }
@@ -600,6 +706,7 @@
     ctx.clearRect(0, 0, state.width, state.height);
     drawAmbientGlow(time);
     updateAndDrawParticles(time);
+    updateAndDrawRipples();
     drawGrid(time);
   }
 
@@ -660,7 +767,7 @@
   }
 
   function startAnimation() {
-    if (state.reducedMotion || state.mobileStaticBackground) {
+    if (state.reducedMotion) {
       stopAnimation();
       renderFrame(window.performance.now());
       resetParallax();
@@ -825,12 +932,6 @@
       return;
     }
 
-    if (state.mobileStaticBackground) {
-      renderFrame(window.performance.now());
-      resetParallax();
-      return;
-    }
-
     startAnimation();
   }
 
@@ -839,7 +940,35 @@
   }
 
   function handlePointerDown(event) {
-    setPointer(event.clientX, event.clientY);
+    const forceFocus = state.mobileAmbientMode || event.pointerType === "touch";
+
+    setPointer(event.clientX, event.clientY, forceFocus);
+
+    if (forceFocus) {
+      addRipple(event.clientX, event.clientY);
+    }
+  }
+
+  function updateMobileNavBalance() {
+    if (!siteNavs.length) {
+      return;
+    }
+
+    for (let index = 0; index < siteNavs.length; index += 1) {
+      const nav = siteNavs[index];
+
+      if (window.innerWidth > 860) {
+        nav.classList.remove("is-overflowing");
+        nav.scrollLeft = 0;
+        continue;
+      }
+
+      if (nav.scrollWidth > nav.clientWidth + 2) {
+        nav.classList.add("is-overflowing");
+      } else {
+        nav.classList.remove("is-overflowing");
+      }
+    }
   }
 
   function handleMotionPreferenceChange() {
@@ -879,9 +1008,16 @@
   }
 
   updateCanvasSize();
+  updateMobileNavBalance();
   initRevealObserver();
   initHighlightRotation();
   startAnimation();
+
+  window.setTimeout(updateMobileNavBalance, 180);
+
+  if (document.fonts && typeof document.fonts.ready === "object") {
+    document.fonts.ready.then(updateMobileNavBalance).catch(function () {});
+  }
 
   for (let index = 0; index < openConsultationButtons.length; index += 1) {
     openConsultationButtons[index].addEventListener("click", openConsultationModal);
@@ -896,6 +1032,7 @@
   }
 
   window.addEventListener("resize", handleResize);
+  window.addEventListener("resize", updateMobileNavBalance);
   window.addEventListener("pointermove", handlePointerMove, { passive: true });
   window.addEventListener("pointerdown", handlePointerDown, { passive: true });
   window.addEventListener("pointerleave", clearPointer);
