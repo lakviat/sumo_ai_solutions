@@ -14,6 +14,8 @@
     name="keywords"
     content="SUMO AI Solutions, website creation, website development, web design, web page creation, web application development, custom web applications, mobile app development, iOS app development, Android app development, AI business integration, AI automation, business automation using AI, AI workflow automation, automation systems, AI consulting, IT consulting, IT solutions, custom software development, digital product development, internal tools, dashboards, technical consulting, embedded technical teams, technical delivery, software consultants, enterprise software solutions, startup technology partner, local business websites, operational efficiency, process optimization, recruiting in IT, IT recruiting, technical recruiting, team augmentation, digital transformation"
   >
+  <link rel="icon" type="image/svg+xml" href="assets/favicon-sumo-mark.svg">
+  <link rel="shortcut icon" href="assets/favicon-sumo-mark.svg">
   <link rel="canonical" href="https://sumoaisolutions.com/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="SUMO AI Solutions">
@@ -467,11 +469,11 @@
         <h2 id="consultationTitle">Tell us what you are trying to build.</h2>
         <p>
           Share your project goals, contact details, requirements, and reference links.
-          The form is ready for Google Apps Script integration in the next step.
+          Your request and attachments are sent directly to SUMO AI Solutions for review.
         </p>
       </div>
 
-      <form class="consultation-form" id="consultationForm">
+      <form class="consultation-form" id="consultationForm" data-endpoint="https://script.google.com/macros/s/AKfycbzSDoKrP5WWN14kzDUCTtE5N9jBej-nVHb2ZEJLPkccyhfFOqykzQCnPzPtrISZbTLETw/exec">
         <div class="form-grid">
           <label class="form-field">
             <span>First Name</span>
@@ -507,18 +509,18 @@
           </label>
           <label class="form-field form-field-full">
             <span>Attachments</span>
-            <input type="file" name="attachments" multiple accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.webp,.zip,.fig">
-            <small>Attach briefs, screenshots, requirements, wireframes, or notes.</small>
+            <input type="file" name="attachments" multiple accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.zip">
+            <small>Attach briefs, screenshots, requirements, or wireframes. Up to 10 MB per file.</small>
           </label>
         </div>
 
         <div class="consultation-actions">
-          <button class="button button-primary" type="submit">Prepare Consultation Request</button>
+          <button class="button button-primary" type="submit">Send Consultation Request</button>
           <button class="button button-secondary" type="button" data-close-consultation>Cancel</button>
         </div>
 
         <p class="consultation-status" id="consultationStatus" aria-live="polite">
-          Submission wiring is not connected yet. This form is ready for your Google Apps Script integration.
+          Share your project details and attachments. We will receive them by email and in Google Drive.
         </p>
       </form>
     </div>

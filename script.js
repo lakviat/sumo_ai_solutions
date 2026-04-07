@@ -21,8 +21,28 @@
   const closeConsultationButtons = Array.from(document.querySelectorAll("[data-close-consultation]"));
   const consultationForm = document.getElementById("consultationForm");
   const consultationStatus = document.getElementById("consultationStatus");
+  const consultationSubmitButton = consultationForm
+    ? consultationForm.querySelector('button[type="submit"]')
+    : null;
   const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const coarsePointerQuery = window.matchMedia("(pointer: coarse)");
+  const consultationConfig = {
+    endpoint: consultationForm ? String(consultationForm.dataset.endpoint || "").trim() : "",
+    maxAttachmentBytes: 10 * 1024 * 1024,
+    requestTimeoutMs: 30000,
+    allowedExtensions: ["pdf", "doc", "docx", "txt", "jpg", "jpeg", "png", "zip"],
+    allowedMimeTypes: [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain",
+      "image/jpeg",
+      "image/png",
+      "application/zip",
+      "application/x-zip-compressed",
+      "application/octet-stream"
+    ]
+  };
 
   const state = {
     width: 0,
@@ -36,6 +56,7 @@
     frameInterval: 1000 / 36,
     reducedMotion: reducedMotionQuery.matches,
     coarsePointer: coarsePointerQuery.matches || window.innerWidth < 900,
+    mobileStaticBackground: false,
     parallaxEnabled: false,
     points: [],
     particles: [],
@@ -52,6 +73,7 @@
     activeHighlightIndex: 0
   };
   const defaultConsultationStatus = consultationStatus ? consultationStatus.textContent : "";
+  const defaultConsultationSubmitLabel = consultationSubmitButton ? consultationSubmitButton.textContent : "";
 
   function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
@@ -69,14 +91,267 @@
     return min + Math.random() * (max - min);
   }
 
+  function getFileExtension(fileName) {
+    const segments = String(fileName || "").split(".");
+
+    return segments.length > 1 ? segments.pop().toLowerCase() : "";
+  }
+
+  function guessMimeType(extension) {
+    switch (extension) {
+      case "pdf":
+        return "application/pdf";
+      case "doc":
+        return "application/msword";
+      case "docx":
+        return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+      case "txt":
+        return "text/plain";
+      case "jpg":
+      case "jpeg":
+        return "image/jpeg";
+      case "png":
+        return "image/png";
+      case "zip":
+        return "application/zip";
+      default:
+        return "application/octet-stream";
+    }
+  }
+
+  function setConsultationStatus(message, tone) {
+    if (!consultationStatus) {
+      return;
+    }
+
+    consultationStatus.textContent = message;
+    consultationStatus.classList.remove("is-success", "is-error", "is-pending");
+
+    if (tone) {
+      consultationStatus.classList.add("is-" + tone);
+    }
+  }
+
+  function setConsultationSubmitting(isSubmitting) {
+    if (!consultationSubmitButton) {
+      return;
+    }
+
+    consultationSubmitButton.disabled = isSubmitting;
+    consultationSubmitButton.textContent = isSubmitting
+      ? "Sending Consultation Request..."
+      : defaultConsultationSubmitLabel;
+  }
+
+  function validateConsultationFiles(files) {
+    for (let index = 0; index < files.length; index += 1) {
+      const file = files[index];
+      const extension = getFileExtension(file.name);
+      const mimeType = String(file.type || guessMimeType(extension)).toLowerCase();
+
+      if (!consultationConfig.allowedExtensions.includes(extension)) {
+        throw new Error(
+          "Unsupported attachment type for " +
+            file.name +
+            ". Use PDF, DOC, DOCX, TXT, JPG, PNG, or ZIP."
+        );
+      }
+
+      if (file.size > consultationConfig.maxAttachmentBytes) {
+        throw new Error(file.name + " exceeds the 10 MB file size limit.");
+      }
+
+      if (mimeType && !consultationConfig.allowedMimeTypes.includes(mimeType)) {
+        throw new Error("Unsupported attachment format for " + file.name + ".");
+      }
+    }
+  }
+
+  function readFileAsBase64(file) {
+    return new Promise(function (resolve, reject) {
+      const reader = new FileReader();
+
+      reader.onload = function () {
+        const result = String(reader.result || "");
+        const commaIndex = result.indexOf(",");
+
+        if (commaIndex === -1) {
+          reject(new Error("Could not process attachment " + file.name + "."));
+          return;
+        }
+
+        resolve(result.slice(commaIndex + 1));
+      };
+
+      reader.onerror = function () {
+        reject(new Error("Could not read attachment " + file.name + "."));
+      };
+
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function serializeAttachments(files) {
+    const attachments = [];
+
+    for (let index = 0; index < files.length; index += 1) {
+      const file = files[index];
+      const extension = getFileExtension(file.name);
+
+      attachments.push({
+        name: file.name,
+        size: file.size,
+        mimeType: String(file.type || guessMimeType(extension)).toLowerCase(),
+        base64: await readFileAsBase64(file)
+      });
+    }
+
+    return attachments;
+  }
+
+  async function buildConsultationPayload() {
+    if (!consultationForm) {
+      throw new Error("Consultation form is not available.");
+    }
+
+    const formData = new FormData(consultationForm);
+    const firstName = String(formData.get("first_name") || "").trim();
+    const lastName = String(formData.get("last_name") || "").trim();
+    const email = String(formData.get("email") || "").trim();
+    const phone = String(formData.get("phone") || "").trim();
+    const whatsapp = String(formData.get("whatsapp") || "").trim();
+    const company = String(formData.get("company") || "").trim();
+    const projectDescription = String(formData.get("project_description") || "").trim();
+    const referenceLinks = String(formData.get("reference_links") || "").trim();
+    const files = Array.from(
+      (consultationForm.querySelector('input[name="attachments"]') || {}).files || []
+    );
+
+    if (!firstName) {
+      throw new Error("First name is required.");
+    }
+
+    if (!lastName) {
+      throw new Error("Last name is required.");
+    }
+
+    if (!email) {
+      throw new Error("Email address is required.");
+    }
+
+    if (!projectDescription) {
+      throw new Error("Project details are required.");
+    }
+
+    validateConsultationFiles(files);
+
+    return {
+      source: window.location.hostname || "sumoaisolutions.com",
+      pageUrl: window.location.href,
+      firstName: firstName,
+      lastName: lastName,
+      fullName: (firstName + " " + lastName).trim(),
+      email: email,
+      phone: phone,
+      whatsapp: whatsapp,
+      company: company,
+      message: projectDescription,
+      projectDescription: projectDescription,
+      referenceLinks: referenceLinks,
+      attachments: await serializeAttachments(files)
+    };
+  }
+
+  async function postConsultationPayload(endpoint, payload, mode) {
+    const controller = typeof AbortController === "function" ? new AbortController() : null;
+    const timeoutId = controller
+      ? window.setTimeout(function () {
+          controller.abort();
+        }, consultationConfig.requestTimeoutMs)
+      : 0;
+
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        mode: mode,
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify(payload),
+        signal: controller ? controller.signal : undefined
+      });
+
+      if (mode === "no-cors") {
+        return {
+          success: true,
+          opaque: true,
+          message:
+            "Consultation request sent. The browser could not read the Google Apps Script confirmation, but the request was submitted."
+        };
+      }
+
+      let data = null;
+
+      try {
+        data = await response.json();
+      } catch (error) {
+        data = null;
+      }
+
+      if (!response.ok || !data || data.success !== true) {
+        throw new Error(
+          (data && data.message) || "The consultation request could not be processed."
+        );
+      }
+
+      return data;
+    } catch (error) {
+      if (error && error.name === "AbortError") {
+        throw new Error("The consultation request timed out. Please try again.");
+      }
+
+      throw error;
+    } finally {
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    }
+  }
+
+  async function submitConsultationPayload(payload) {
+    const endpoint = consultationConfig.endpoint;
+
+    if (!/^https?:\/\//.test(endpoint)) {
+      throw new Error(
+        "Add your deployed Google Apps Script web app URL to the form's data-endpoint attribute before sending live requests."
+      );
+    }
+
+    try {
+      return await postConsultationPayload(endpoint, payload, "cors");
+    } catch (error) {
+      const isCorsLikeError =
+        error &&
+        (error.name === "TypeError" ||
+          /fetch|cors|network/i.test(String(error.message || "")));
+
+      if (!isCorsLikeError) {
+        throw error;
+      }
+
+      return postConsultationPayload(endpoint, payload, "no-cors");
+    }
+  }
+
   function updateQuality() {
     state.reducedMotion = reducedMotionQuery.matches;
     state.coarsePointer = coarsePointerQuery.matches || window.innerWidth < 900;
+    state.mobileStaticBackground = state.coarsePointer;
     state.spacing = state.coarsePointer ? 54 : 44;
     state.baseRadius = state.coarsePointer ? 1.12 : 1.28;
     state.activeRadius = state.coarsePointer ? 1.95 : 2.8;
     state.influenceRadius = state.reducedMotion ? 0 : state.coarsePointer ? 92 : 170;
-    state.particleCount = state.reducedMotion ? 0 : state.coarsePointer ? 8 : 18;
+    state.particleCount = state.reducedMotion ? 0 : state.coarsePointer ? 0 : 18;
     state.frameInterval = state.coarsePointer ? 1000 / 24 : 1000 / 36;
     state.parallaxEnabled = !state.reducedMotion && !state.coarsePointer;
   }
@@ -385,7 +660,7 @@
   }
 
   function startAnimation() {
-    if (state.reducedMotion) {
+    if (state.reducedMotion || state.mobileStaticBackground) {
       stopAnimation();
       renderFrame(window.performance.now());
       resetParallax();
@@ -479,10 +754,8 @@
     consultationModal.hidden = false;
     document.body.classList.add("is-modal-open");
 
-    if (consultationStatus) {
-      consultationStatus.textContent = defaultConsultationStatus;
-      consultationStatus.classList.remove("is-success");
-    }
+    setConsultationStatus(defaultConsultationStatus, "");
+    setConsultationSubmitting(false);
 
     const firstInput = consultationModal.querySelector("input, textarea");
 
@@ -502,25 +775,63 @@
     document.body.classList.remove("is-modal-open");
   }
 
-  function handleConsultationSubmit(event) {
+  async function handleConsultationSubmit(event) {
     event.preventDefault();
 
-    if (!consultationStatus) {
+    if (!consultationForm) {
       return;
     }
 
-    consultationStatus.textContent =
-      "Consultation request captured in the frontend. The upload and email workflow will be connected when your Google Apps Script endpoint is added.";
-    consultationStatus.classList.add("is-success");
+    try {
+      setConsultationSubmitting(true);
+      setConsultationStatus("Uploading your details and preparing attachments...", "pending");
+
+      const payload = await buildConsultationPayload();
+      const response = await submitConsultationPayload(payload);
+
+      consultationForm.reset();
+      setConsultationStatus(
+        (response && response.message) ||
+          "Consultation request sent. We received your details and attachments.",
+        "success"
+      );
+    } catch (error) {
+      setConsultationStatus(
+        (error && error.message) || "The consultation request could not be sent.",
+        "error"
+      );
+    } finally {
+      setConsultationSubmitting(false);
+    }
   }
 
   function handleResize() {
+    const nextWidth = window.innerWidth;
+    const nextHeight = window.innerHeight;
+
+    if (
+      state.coarsePointer &&
+      Math.abs(nextWidth - state.width) < 4 &&
+      Math.abs(nextHeight - state.height) < 120
+    ) {
+      return;
+    }
+
     updateCanvasSize();
 
     if (state.reducedMotion) {
       renderFrame(window.performance.now());
       resetParallax();
+      return;
     }
+
+    if (state.mobileStaticBackground) {
+      renderFrame(window.performance.now());
+      resetParallax();
+      return;
+    }
+
+    startAnimation();
   }
 
   function handlePointerMove(event) {

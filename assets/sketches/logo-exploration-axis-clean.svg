@@ -1,0 +1,21 @@
+<svg width="1400" height="800" viewBox="0 0 1400 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="12" y="12" width="1376" height="776" rx="28" fill="#F8F8F6" stroke="#5B5AE6" stroke-width="4"/>
+  <text x="48" y="66" fill="#171717" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="400">Sumo AI Solutions</text>
+  <text x="1068" y="66" fill="#171717" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400">About</text>
+  <text x="1154" y="66" fill="#171717" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400">Services</text>
+  <text x="1266" y="66" fill="#171717" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400">Contact</text>
+
+  <g transform="translate(700 290)">
+    <line x1="-140" y1="0" x2="-28" y2="0" stroke="#111111" stroke-width="6"/>
+    <line x1="28" y1="0" x2="140" y2="0" stroke="#111111" stroke-width="6"/>
+    <line x1="0" y1="26" x2="0" y2="118" stroke="#111111" stroke-width="6"/>
+    <line x1="0" y1="-90" x2="0" y2="-28" stroke="#111111" stroke-width="6"/>
+    <circle cx="0" cy="-92" r="11" fill="#F8F8F6" stroke="#111111" stroke-width="6"/>
+    <rect x="-18" y="-18" width="36" height="36" transform="rotate(45 0 0)" fill="#D93025"/>
+  </g>
+
+  <text x="700" y="480" fill="#111111" font-family="Arial, Helvetica, sans-serif" font-size="104" font-weight="300" text-anchor="middle">Sumo AI</text>
+  <text x="700" y="546" fill="#111111" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="300" text-anchor="middle">Solutions</text>
+  <text x="700" y="650" fill="#2B2B2B" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="400" text-anchor="middle">Direction A: clean axis mark with one red precision node.</text>
+  <text x="700" y="742" fill="#3F3F3F" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle">Sketch exploration for brand direction only. Not applied to site.</text>
+</svg>

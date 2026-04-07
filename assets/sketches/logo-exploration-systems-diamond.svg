@@ -1,0 +1,19 @@
+<svg width="1400" height="800" viewBox="0 0 1400 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1400" height="800" rx="28" fill="#F7F7F4"/>
+  <g transform="translate(700 248)">
+    <line x1="-170" y1="0" x2="-46" y2="0" stroke="#121212" stroke-width="5"/>
+    <line x1="46" y1="0" x2="170" y2="0" stroke="#121212" stroke-width="5"/>
+    <line x1="0" y1="-118" x2="0" y2="-42" stroke="#121212" stroke-width="5"/>
+    <line x1="0" y1="42" x2="0" y2="132" stroke="#121212" stroke-width="5"/>
+    <circle cx="0" cy="-120" r="12" fill="#F7F7F4" stroke="#121212" stroke-width="5"/>
+    <path d="M-34 0L0 -34L34 0L0 34L-34 0Z" fill="#D12B24"/>
+    <circle cx="-110" cy="0" r="5" fill="#121212"/>
+    <circle cx="110" cy="0" r="5" fill="#121212"/>
+    <circle cx="0" cy="86" r="5" fill="#121212"/>
+  </g>
+
+  <text x="700" y="446" fill="#111111" font-family="Arial, Helvetica, sans-serif" font-size="102" font-weight="300" text-anchor="middle">Sumo AI</text>
+  <text x="700" y="512" fill="#111111" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="300" text-anchor="middle">Solutions</text>
+  <text x="700" y="604" fill="#262626" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="400" text-anchor="middle">Direction C: more technical, more infrastructure-oriented, still minimal.</text>
+  <text x="700" y="646" fill="#5F5F5F" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" text-anchor="middle">This one leans strongest into AI systems and enterprise delivery.</text>
+</svg>
