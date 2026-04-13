@@ -18,6 +18,16 @@
   const rotatingItems = Array.from(document.querySelectorAll("[data-rotate-item]"));
   const siteNavs = Array.from(document.querySelectorAll(".site-nav"));
   const inPageAnchors = Array.from(document.querySelectorAll('a[href^="#"]'));
+  const previewFrames = Array.from(document.querySelectorAll("iframe[data-preview-frame]"));
+  const openPortfolioPreviewButtons = Array.from(document.querySelectorAll("[data-open-preview]"));
+  const portfolioPreviewModal = document.getElementById("portfolioPreviewModal");
+  const closePortfolioPreviewButtons = Array.from(
+    document.querySelectorAll("[data-close-portfolio-preview]")
+  );
+  const portfolioPreviewFrame = document.getElementById("portfolioPreviewFrame");
+  const portfolioPreviewTitle = document.getElementById("portfolioPreviewTitle");
+  const portfolioPreviewDomain = document.getElementById("portfolioPreviewDomain");
+  const portfolioPreviewLiveLink = document.getElementById("portfolioPreviewLiveLink");
   const openConsultationButtons = Array.from(document.querySelectorAll("[data-open-consultation]"));
   const consultationModal = document.getElementById("consultationModal");
   const closeConsultationButtons = Array.from(document.querySelectorAll("[data-close-consultation]"));
@@ -860,6 +870,10 @@
       return;
     }
 
+    if (portfolioPreviewModal && !portfolioPreviewModal.hidden) {
+      closePortfolioPreviewModal();
+    }
+
     consultationModal.hidden = false;
     document.body.classList.add("is-modal-open");
 
@@ -881,7 +895,62 @@
     }
 
     consultationModal.hidden = true;
-    document.body.classList.remove("is-modal-open");
+
+    if (!portfolioPreviewModal || portfolioPreviewModal.hidden) {
+      document.body.classList.remove("is-modal-open");
+    }
+  }
+
+  function openPortfolioPreviewModal(source) {
+    if (!portfolioPreviewModal || !portfolioPreviewFrame) {
+      return;
+    }
+
+    const trigger = source && source.currentTarget ? source.currentTarget : source;
+
+    if (!trigger || !trigger.dataset) {
+      return;
+    }
+
+    const previewUrl = String(trigger.dataset.previewUrl || "").trim();
+    const previewTitle = String(trigger.dataset.previewTitle || "Portfolio Project").trim();
+    const previewDomain = String(trigger.dataset.previewDomain || "Website Preview").trim();
+
+    if (!/^https?:\/\//.test(previewUrl)) {
+      return;
+    }
+
+    if (portfolioPreviewTitle) {
+      portfolioPreviewTitle.textContent = previewTitle;
+    }
+
+    if (portfolioPreviewDomain) {
+      portfolioPreviewDomain.textContent = previewDomain;
+    }
+
+    if (portfolioPreviewLiveLink) {
+      portfolioPreviewLiveLink.href = previewUrl;
+    }
+
+    portfolioPreviewFrame.src = previewUrl;
+    portfolioPreviewModal.hidden = false;
+    document.body.classList.add("is-modal-open");
+  }
+
+  function closePortfolioPreviewModal() {
+    if (!portfolioPreviewModal) {
+      return;
+    }
+
+    portfolioPreviewModal.hidden = true;
+
+    if (portfolioPreviewFrame) {
+      portfolioPreviewFrame.src = "";
+    }
+
+    if (!consultationModal || consultationModal.hidden) {
+      document.body.classList.remove("is-modal-open");
+    }
   }
 
   async function handleConsultationSubmit(event) {
@@ -1113,7 +1182,16 @@
   }
 
   function handleKeyDown(event) {
-    if (event.key === "Escape" && consultationModal && !consultationModal.hidden) {
+    if (event.key !== "Escape") {
+      return;
+    }
+
+    if (portfolioPreviewModal && !portfolioPreviewModal.hidden) {
+      closePortfolioPreviewModal();
+      return;
+    }
+
+    if (consultationModal && !consultationModal.hidden) {
       closeConsultationModal();
     }
   }
@@ -1142,12 +1220,63 @@
     openConsultationButtons[index].addEventListener("click", openConsultationModal);
   }
 
+  for (let index = 0; index < openPortfolioPreviewButtons.length; index += 1) {
+    openPortfolioPreviewButtons[index].addEventListener("click", function (event) {
+      event.preventDefault();
+      openPortfolioPreviewModal(event.currentTarget);
+    });
+  }
+
+  document.addEventListener("click", function (event) {
+    if (event.defaultPrevented) {
+      return;
+    }
+
+    const trigger = event.target && event.target.closest
+      ? event.target.closest("[data-open-preview]")
+      : null;
+
+    if (!trigger) {
+      return;
+    }
+
+    event.preventDefault();
+    openPortfolioPreviewModal(trigger);
+  });
+
+  document.addEventListener("keydown", function (event) {
+    const trigger = event.target && event.target.closest
+      ? event.target.closest("[data-open-preview]")
+      : null;
+
+    if (!trigger) {
+      return;
+    }
+
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    event.preventDefault();
+    openPortfolioPreviewModal(trigger);
+  });
+
   for (let index = 0; index < inPageAnchors.length; index += 1) {
     inPageAnchors[index].addEventListener("click", handleInPageAnchorClick);
   }
 
+  for (let index = 0; index < previewFrames.length; index += 1) {
+    previewFrames[index].addEventListener("load", function () {
+      previewFrames[index].classList.add("is-loaded");
+    });
+  }
+
   for (let index = 0; index < closeConsultationButtons.length; index += 1) {
     closeConsultationButtons[index].addEventListener("click", closeConsultationModal);
+  }
+
+  for (let index = 0; index < closePortfolioPreviewButtons.length; index += 1) {
+    closePortfolioPreviewButtons[index].addEventListener("click", closePortfolioPreviewModal);
   }
 
   if (consultationForm) {
