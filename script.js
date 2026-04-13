@@ -168,13 +168,16 @@
 
   function trackAdsLeadFormConversion() {
     if (typeof window.gtag === "function") {
-      window.gtag("event", "ads_conversion_Form_1", {});
+      window.gtag("event", "conversion", {
+        send_to: "AW-17948229197/VZTvCKPwzogcEM38sO5C"
+      });
       return;
     }
 
     if (Array.isArray(window.dataLayer)) {
       window.dataLayer.push({
-        event: "ads_conversion_Form_1"
+        event: "conversion",
+        send_to: "AW-17948229197/VZTvCKPwzogcEM38sO5C"
       });
     }
   }
