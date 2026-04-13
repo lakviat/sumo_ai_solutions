@@ -166,6 +166,19 @@
       : defaultConsultationSubmitLabel;
   }
 
+  function trackAdsLeadFormConversion() {
+    if (typeof window.gtag === "function") {
+      window.gtag("event", "ads_conversion_Form_1", {});
+      return;
+    }
+
+    if (Array.isArray(window.dataLayer)) {
+      window.dataLayer.push({
+        event: "ads_conversion_Form_1"
+      });
+    }
+  }
+
   function validateConsultationFiles(files) {
     for (let index = 0; index < files.length; index += 1) {
       const file = files[index];
@@ -1019,6 +1032,7 @@
           "Consultation request sent. We received your details and attachments.",
         "success"
       );
+      trackAdsLeadFormConversion();
     } catch (error) {
       setConsultationStatus(
         (error && error.message) || "The consultation request could not be sent.",
