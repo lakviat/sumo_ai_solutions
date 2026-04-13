@@ -17,6 +17,7 @@
   const parallaxElements = Array.from(document.querySelectorAll("[data-parallax-depth]"));
   const rotatingItems = Array.from(document.querySelectorAll("[data-rotate-item]"));
   const siteNavs = Array.from(document.querySelectorAll(".site-nav"));
+  const inPageAnchors = Array.from(document.querySelectorAll('a[href^="#"]'));
   const openConsultationButtons = Array.from(document.querySelectorAll("[data-open-consultation]"));
   const consultationModal = document.getElementById("consultationModal");
   const closeConsultationButtons = Array.from(document.querySelectorAll("[data-close-consultation]"));
@@ -44,6 +45,13 @@
       "application/octet-stream"
     ]
   };
+  const guidedSectionIds = {
+    services: true,
+    about: true,
+    solutions: true
+  };
+  const spotlightTimers = new WeakMap();
+  const guidedCardTimers = new WeakMap();
 
   const state = {
     width: 0,
@@ -965,6 +973,123 @@
     }
   }
 
+  function getSectionSpotlight(sectionId) {
+    const targetSection = document.getElementById(sectionId);
+
+    if (!targetSection) {
+      return null;
+    }
+
+    return targetSection.querySelector("[data-section-spotlight]");
+  }
+
+  function triggerSectionSpotlight(sectionId) {
+    const spotlight = getSectionSpotlight(sectionId);
+
+    if (!spotlight || state.reducedMotion) {
+      return;
+    }
+
+    const existingTimer = spotlightTimers.get(spotlight);
+
+    if (existingTimer) {
+      window.clearTimeout(existingTimer);
+    }
+
+    spotlight.classList.remove("is-guided");
+    void spotlight.offsetWidth;
+    spotlight.classList.add("is-guided");
+
+    spotlightTimers.set(
+      spotlight,
+      window.setTimeout(function () {
+        spotlight.classList.remove("is-guided");
+      }, 1700)
+    );
+  }
+
+  function triggerGuidedCard(card) {
+    if (!card || state.reducedMotion) {
+      return;
+    }
+
+    const existingTimer = guidedCardTimers.get(card);
+
+    if (existingTimer) {
+      window.clearTimeout(existingTimer);
+    }
+
+    card.classList.remove("is-guided-target");
+    void card.offsetWidth;
+    card.classList.add("is-guided-target");
+
+    guidedCardTimers.set(
+      card,
+      window.setTimeout(function () {
+        card.classList.remove("is-guided-target");
+      }, 1300)
+    );
+  }
+
+  function scheduleSectionSpotlight(hash) {
+    const sectionId = String(hash || "").replace(/^#/, "");
+    let attempts = 0;
+
+    function activateWhenReady() {
+      const targetSection = document.getElementById(sectionId);
+      const parentSection = targetSection ? targetSection.closest(".section") : null;
+
+      if (!targetSection) {
+        return;
+      }
+
+      const rect = targetSection.getBoundingClientRect();
+      const isInView =
+        rect.top <= window.innerHeight * 0.56 &&
+        rect.bottom >= window.innerHeight * 0.24;
+
+      if (isInView || attempts >= 6) {
+        if (guidedSectionIds[sectionId]) {
+          triggerSectionSpotlight(sectionId);
+        }
+
+        if (
+          parentSection &&
+          parentSection.id &&
+          parentSection.id !== sectionId &&
+          guidedSectionIds[parentSection.id]
+        ) {
+          triggerSectionSpotlight(parentSection.id);
+        }
+
+        if (targetSection.matches("[data-guided-card]")) {
+          triggerGuidedCard(targetSection);
+        }
+
+        return;
+      }
+
+      attempts += 1;
+      window.setTimeout(activateWhenReady, 140);
+    }
+
+    window.setTimeout(activateWhenReady, 180);
+  }
+
+  function handleInPageAnchorClick(event) {
+    const href = event.currentTarget.getAttribute("href");
+
+    if (!href || href.charAt(0) !== "#") {
+      return;
+    }
+
+    scheduleSectionSpotlight(href);
+  }
+
+  function handleHashChange() {
+    scheduleSectionSpotlight(window.location.hash);
+  }
+
   function handleMotionPreferenceChange() {
     updateCanvasSize();
     resetHighlightRotation();
@@ -1017,6 +1142,10 @@
     openConsultationButtons[index].addEventListener("click", openConsultationModal);
   }
 
+  for (let index = 0; index < inPageAnchors.length; index += 1) {
+    inPageAnchors[index].addEventListener("click", handleInPageAnchorClick);
+  }
+
   for (let index = 0; index < closeConsultationButtons.length; index += 1) {
     closeConsultationButtons[index].addEventListener("click", closeConsultationModal);
   }
@@ -1032,8 +1161,10 @@
   window.addEventListener("pointerleave", clearPointer);
   window.addEventListener("blur", clearPointer);
   window.addEventListener("keydown", handleKeyDown);
+  window.addEventListener("hashchange", handleHashChange);
   document.addEventListener("mouseleave", clearPointer);
   document.addEventListener("visibilitychange", handleVisibilityChange);
   addMediaChangeListener(reducedMotionQuery, handleMotionPreferenceChange);
   addMediaChangeListener(coarsePointerQuery, handleMotionPreferenceChange);
+  handleHashChange();
 })();
