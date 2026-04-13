@@ -25,6 +25,8 @@
     document.querySelectorAll("[data-close-portfolio-preview]")
   );
   const portfolioPreviewFrame = document.getElementById("portfolioPreviewFrame");
+  const portfolioPreviewImage = document.getElementById("portfolioPreviewImage");
+  const portfolioPreviewNote = document.getElementById("portfolioPreviewNote");
   const portfolioPreviewTitle = document.getElementById("portfolioPreviewTitle");
   const portfolioPreviewDomain = document.getElementById("portfolioPreviewDomain");
   const portfolioPreviewLiveLink = document.getElementById("portfolioPreviewLiveLink");
@@ -902,7 +904,7 @@
   }
 
   function openPortfolioPreviewModal(source) {
-    if (!portfolioPreviewModal || !portfolioPreviewFrame) {
+    if (!portfolioPreviewModal) {
       return;
     }
 
@@ -915,6 +917,8 @@
     const previewUrl = String(trigger.dataset.previewUrl || "").trim();
     const previewTitle = String(trigger.dataset.previewTitle || "Portfolio Project").trim();
     const previewDomain = String(trigger.dataset.previewDomain || "Website Preview").trim();
+    const previewMode = String(trigger.dataset.previewMode || "").trim().toLowerCase();
+    const previewImageUrl = String(trigger.dataset.previewImage || "").trim();
 
     if (!/^https?:\/\//.test(previewUrl)) {
       return;
@@ -932,7 +936,38 @@
       portfolioPreviewLiveLink.href = previewUrl;
     }
 
-    portfolioPreviewFrame.src = previewUrl;
+    if (previewMode === "image" && /^https?:\/\//.test(previewImageUrl)) {
+      if (portfolioPreviewFrame) {
+        portfolioPreviewFrame.hidden = true;
+        portfolioPreviewFrame.src = "";
+      }
+
+      if (portfolioPreviewImage) {
+        portfolioPreviewImage.src = previewImageUrl;
+        portfolioPreviewImage.alt = previewTitle + " preview image";
+        portfolioPreviewImage.hidden = false;
+      }
+
+      if (portfolioPreviewNote) {
+        portfolioPreviewNote.hidden = false;
+      }
+    } else {
+      if (portfolioPreviewImage) {
+        portfolioPreviewImage.hidden = true;
+        portfolioPreviewImage.src = "";
+        portfolioPreviewImage.alt = "";
+      }
+
+      if (portfolioPreviewNote) {
+        portfolioPreviewNote.hidden = true;
+      }
+
+      if (portfolioPreviewFrame) {
+        portfolioPreviewFrame.hidden = false;
+        portfolioPreviewFrame.src = previewUrl;
+      }
+    }
+
     portfolioPreviewModal.hidden = false;
     document.body.classList.add("is-modal-open");
   }
@@ -945,7 +980,18 @@
     portfolioPreviewModal.hidden = true;
 
     if (portfolioPreviewFrame) {
+      portfolioPreviewFrame.hidden = false;
       portfolioPreviewFrame.src = "";
+    }
+
+    if (portfolioPreviewImage) {
+      portfolioPreviewImage.hidden = true;
+      portfolioPreviewImage.src = "";
+      portfolioPreviewImage.alt = "";
+    }
+
+    if (portfolioPreviewNote) {
+      portfolioPreviewNote.hidden = true;
     }
 
     if (!consultationModal || consultationModal.hidden) {
