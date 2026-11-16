@@ -40,16 +40,33 @@ for (const file of pages) {
   });
 }
 
-test('service-first homepage with six clickable services and an interactive picker', () => {
+test('short service-first homepage without duplicate portfolio cards', () => {
   const html = read('index.html');
   const body = html.split('<body>')[1];
   assert.equal((body.match(/class="service-card"/g) || []).length, 6);
   for (const match of body.matchAll(/<button class="service-card"[^>]+>/g)) assert.ok(match[0].includes('data-open-consultation'));
   assert.doesNotMatch(body, /enterprise|corporat/i);
-  assert.ok(body.indexOf('id="needs"') < body.indexOf('id="services"'));
   assert.ok(body.indexOf('id="services"') < body.indexOf('id="work"'));
-  assert.equal((body.match(/data-picker-tab/g) || []).length, (body.match(/data-picker-panel/g) || []).length);
+  assert.doesNotMatch(body, /data-picker|class="work-card"|showcase-badge/);
+  assert.equal((body.match(/data-showcase-desktop/g) || []).length, 6);
+  assert.equal((body.match(/data-showcase-mobile/g) || []).length, 6);
+  assert.equal((body.match(/data-showcase-tab /g) || []).length, 6);
+  assert.match(body, /data-showcase-pause/);
   assert.doesNotMatch(body, /<iframe/);
+});
+
+test('published pages have unified branding and accessible navigation', () => {
+  for (const file of pages) {
+    const html = read(file);
+    const header = html.match(/<header[\s\S]*?<\/header>/)[0];
+    assert.match(header, /SUMO AI Solutions/);
+    assert.match(header, /Services/);
+    assert.match(header, /Portfolio/);
+    assert.match(header, /Contact/);
+    assert.doesNotMatch(html, /kyrgyz/i);
+  }
+  assert.doesNotMatch(read('style.css'), /\.site-nav\s*\{\s*display:\s*none/);
+  assert.doesNotMatch(read('style.css'), /#ffc3a7|#ffd2bb/i);
 });
 
 test('portfolio shows only real projects, with filters and image previews', () => {

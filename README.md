@@ -2,7 +2,7 @@
 
 ![SUMO AI Solutions: websites, apps, and AI for small businesses](assets/social-preview.png)
 
-**Websites and apps that bring you more customers.**
+**Websites. Apps. AI. Made for you.**
 
 We help small businesses get online, bring app ideas to life, and spend less time on repetitive work. Based in **Miami, Florida**, we work with clients everywhere.
 
@@ -33,16 +33,15 @@ The site is built for people arriving from social ads, most of them on phones. I
 
 | Section | Purpose |
 | --- | --- |
-| Hero + project showcase | Clear promise, two calls to action, and a rotating browser/phone preview of real projects. |
-| "What does your business need?" | Interactive picker. Visitors choose a goal and see what they get, who it's for, and a matching call to action. |
+| Header | The full SUMO AI Solutions wordmark, with Services, Portfolio, How it works, and Contact visible on desktop and mobile. |
+| Hero + project showcase | Six real projects in a browser-and-phone presentation. Each opens a full-page image preview. Manual selection and a pause/resume control are available. |
 | Services | Six clickable cards. Each opens the inquiry form with the topic pre-selected. |
-| Our work | Two featured projects with hover-to-scroll previews and a link to the full portfolio. |
-| Built in, not extra | What every website includes. |
+| Portfolio | One compact link to the full gallery, without repeating hero project images. |
 | How it works | Three-step process. |
-| FAQ | Common questions from first-time website buyers. |
+| FAQ | Three short answers about cost, website improvements, and getting started. |
 | Call to action | Final prompt to get in touch. |
 
-On phones, a sticky "Get started" bar appears after the first screen.
+The header remains available on phones. The lightweight dot field reacts to pointer movement and taps, with ambient movement on touch screens. Reduced-motion mode stops the canvas loop and automatic project rotation. Rotation also stops off screen or in a hidden tab.
 
 **Portfolio** (`/portfolio/`) has filter chips (Home services, Restaurants, Real estate, Web apps), hover-to-scroll previews, full-page previews in a dialog, "Visit live site" links, and a "Build something similar" button on every project.
 
@@ -68,7 +67,7 @@ A build-free static website hosted on GitHub Pages. No application server or pac
 | `index.html` | Homepage, inquiry form, project preview dialog |
 | `portfolio/index.html` | Project gallery with filters and previews |
 | `style.css` | Shared design, responsive layouts, dialogs, reduced-motion rules |
-| `script.js` | Project showcase, needs picker, filters, dialogs, scroll reveals, form submission, conversion event |
+| `script.js` | Project showcase, reactive dot field, filters, dialogs, scroll reveals, form submission, conversion event |
 | `assets/icons.svg` | Shared icon sprite |
 | `assets/portfolio/` | Project screenshots (desktop, mobile, full page) |
 | `assets/fonts/` | Self-hosted Manrope font and its SIL Open Font License |
@@ -81,7 +80,7 @@ A build-free static website hosted on GitHub Pages. No application server or pac
 
 ### Brand
 
-Colors come from the existing brand palette: navy `#183552`, ink `#173b44`, cream `#f9faf5` / `#f6f4ef`, peach accent `#ffc3a7`, cyan `#a9e3ee`, and the logo mark (`assets/favicon-sumo-mark.svg`). Type is Manrope.
+Cool blue backgrounds, translucent glass-style surfaces, white typography, and a restrained red signature inspired by the existing mark. Primary buttons use red `#c83533`; light red `#ff9390` is used for readable accent text. The favicon is unchanged. Type is self-hosted Manrope. Backdrop blur is limited to the header and open-dialog overlay; service cards use inexpensive translucent gradients.
 
 ### Local Preview
 
@@ -100,11 +99,11 @@ node --check script.js
 node --test tests/site.test.cjs
 ```
 
-Also review desktop and mobile layouts, keyboard navigation (picker and showcase tabs support arrow keys), reduced-motion mode, every consultation trigger, and every portfolio preview. Test the form with a mocked endpoint to avoid sending test emails or recording artificial ad conversions.
+Also review desktop and mobile layouts, keyboard navigation (project selectors support arrow keys), reduced-motion mode, every consultation trigger, and every portfolio preview. Test the form with a mocked endpoint to avoid sending test emails or recording artificial ad conversions.
 
 ### Inquiry Form
 
-Every "Get started", service card, picker answer, and "Build something similar" button opens the same form. Buttons can pre-select an interest (website, mobile app, AI & automation, something else). The payload keeps all previous fields (`firstName`, `lastName`, `fullName`, `email`, `phone`, `message`, `projectDescription`, `attachments`, `source`, `pageUrl`) and adds `interest` and `topic`. The chosen interest and starting point are also written at the top of `message`, so they show up in the existing email without backend changes.
+Every consultation button, service card, and "Build something similar" button opens the same form. Buttons can pre-select an interest (website, mobile app, AI & automation, something else). The payload keeps all previous fields (`firstName`, `lastName`, `fullName`, `email`, `phone`, `message`, `projectDescription`, `attachments`, `source`, `pageUrl`, `interest`, `topic`). The chosen interest and starting point are also written at the top of `message`, so they show up in the existing email without backend changes.
 
 ### Preserved Integrations
 
@@ -121,4 +120,4 @@ Publish the repository root from `main` using the existing GitHub Pages configur
 
 ## Start a Conversation
 
-Use **Get started** on [sumoaisolutions.com](https://sumoaisolutions.com/). Tell us what you're building, what needs improving, or where you could use a hand.
+Use **Book a consultation** on [sumoaisolutions.com](https://sumoaisolutions.com/). Tell us what you're building, what needs improving, or where you could use a hand.

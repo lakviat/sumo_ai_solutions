@@ -493,164 +493,209 @@
   function initShowcase() {
     const showcase = $("[data-showcase]");
     if (!showcase) return;
-
     const tabs = $$("[data-showcase-tab]", showcase);
     const desktops = $$("[data-showcase-desktop]", showcase);
     const mobiles = $$("[data-showcase-mobile]", showcase);
-    const title = $("[data-showcase-title]", showcase);
-    const type = $("[data-showcase-type]", showcase);
-    const url = $("[data-showcase-url]", showcase);
     const opener = $("[data-showcase-open]", showcase);
-    const rotateMs = 5200;
+    const pauseButton = $("[data-showcase-pause]", showcase);
     let index = 0;
     let timer = 0;
-    let paused = false;
-
-    showcase.style.setProperty("--rotate-ms", rotateMs + "ms");
-
-    function show(nextIndex, fromUser) {
-      index = (nextIndex + tabs.length) % tabs.length;
-      tabs.forEach(function (tab, i) {
-        const active = i === index;
-        tab.setAttribute("aria-selected", String(active));
-        tab.tabIndex = active ? 0 : -1;
-        // restart progress animation
-        const bar = $(".progress", tab);
-        if (bar && active) { bar.style.animation = "none"; void bar.offsetWidth; bar.style.animation = ""; }
-      });
-      desktops.forEach(function (img, i) { img.classList.toggle("is-active", i === index); });
-      mobiles.forEach(function (img, i) { img.classList.toggle("is-active", i === index); });
-
-      const tab = tabs[index];
-      if (title) title.textContent = tab.dataset.title;
-      if (type) type.textContent = tab.dataset.type;
-      if (url) url.textContent = tab.dataset.url;
-      if (opener) opener.setAttribute("aria-label", "Preview the " + tab.dataset.title + " website");
-      if (fromUser) restart();
-    }
+    let userPaused = prefersReducedMotion();
+    let hovered = false;
+    let focused = false;
+    let inView = false;
 
     function stop() {
       window.clearTimeout(timer);
       timer = 0;
     }
 
-    function restart() {
+    function schedule() {
       stop();
-      if (prefersReducedMotion() || paused) {
-        showcase.classList.remove("is-rotating");
-        return;
-      }
-      showcase.classList.add("is-rotating");
-      timer = window.setTimeout(function () { show(index + 1); restart(); }, rotateMs);
+      if (userPaused || hovered || focused || !inView || document.hidden || prefersReducedMotion()) return;
+      timer = window.setTimeout(function () { show(index + 1); }, 6000);
+    }
+
+    function syncPauseButton() {
+      if (!pauseButton) return;
+      pauseButton.classList.toggle("is-paused", userPaused);
+      pauseButton.setAttribute("aria-label", userPaused ? "Resume project rotation" : "Pause project rotation");
+    }
+
+    function show(nextIndex) {
+      index = (nextIndex + tabs.length) % tabs.length;
+      tabs.forEach(function (tab, i) { tab.setAttribute("aria-pressed", String(i === index)); });
+      desktops.forEach(function (image, i) {
+        image.classList.toggle("is-active", i === index);
+        image.setAttribute("aria-hidden", String(i !== index));
+      });
+      mobiles.forEach(function (image, i) { image.classList.toggle("is-active", i === index); });
+      const selected = tabs[index];
+      $("[data-showcase-title]", showcase).textContent = selected.dataset.title;
+      $("[data-showcase-type]", showcase).textContent = selected.dataset.type;
+      $("[data-showcase-url]", showcase).textContent = selected.dataset.url;
+      opener.setAttribute("aria-label", "Preview " + selected.dataset.title + " website");
+      schedule();
     }
 
     tabs.forEach(function (tab, i) {
-      tab.addEventListener("click", function () { show(i, true); });
+      tab.addEventListener("click", function () {
+        userPaused = true;
+        syncPauseButton();
+        show(i);
+      });
       tab.addEventListener("keydown", function (event) {
-        if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
-          event.preventDefault();
-          show(index + (event.key === "ArrowRight" ? 1 : -1), true);
-          tabs[index].focus();
+        const offsets = { ArrowRight: 1, ArrowLeft: -1 };
+        let next = null;
+        if (event.key in offsets) next = (i + offsets[event.key] + tabs.length) % tabs.length;
+        if (event.key === "Home") next = 0;
+        if (event.key === "End") next = tabs.length - 1;
+        if (next === null) return;
+        event.preventDefault();
+        userPaused = true;
+        syncPauseButton();
+        show(next);
+        tabs[next].focus();
+      });
+    });
+
+    opener.addEventListener("click", function () {
+      const selected = tabs[index];
+      stop();
+      openPortfolioPreviewModal({
+        dataset: {
+          previewUrl: selected.dataset.live,
+          previewTitle: selected.dataset.title,
+          previewDomain: selected.dataset.url,
+          previewImage: selected.dataset.full
         }
       });
+      portfolioReturnFocus = opener;
     });
 
-    if (opener) {
-      opener.addEventListener("click", function () {
-        const tab = tabs[index];
-        openPortfolioPreviewModal({
-          dataset: {
-            previewUrl: tab.dataset.live,
-            previewTitle: tab.dataset.title,
-            previewDomain: tab.dataset.url,
-            previewImage: tab.dataset.full
-          }
-        });
-        portfolioReturnFocus = opener;
-      });
-    }
-
-    function setPaused(value) {
-      paused = value;
-      showcase.classList.toggle("is-paused", value);
-      if (value) stop(); else restart();
-    }
-
-    showcase.addEventListener("mouseenter", function () { setPaused(true); });
-    showcase.addEventListener("mouseleave", function () { setPaused(false); });
-    showcase.addEventListener("focusin", function () { setPaused(true); });
+    if (pauseButton) pauseButton.addEventListener("click", function () {
+      userPaused = !userPaused;
+      syncPauseButton();
+      schedule();
+    });
+    showcase.addEventListener("pointerenter", function (event) {
+      if (event.pointerType === "touch") return;
+      hovered = true;
+      stop();
+    });
+    showcase.addEventListener("pointerleave", function () { hovered = false; schedule(); });
+    showcase.addEventListener("focusin", function () { focused = true; stop(); });
     showcase.addEventListener("focusout", function (event) {
-      if (!showcase.contains(event.relatedTarget)) setPaused(false);
+      focused = showcase.contains(event.relatedTarget);
+      schedule();
     });
-    document.addEventListener("visibilitychange", function () {
-      if (document.hidden) stop(); else restart();
+    document.addEventListener("visibilitychange", schedule);
+    reducedMotionQuery.addEventListener("change", function () {
+      userPaused = prefersReducedMotion();
+      syncPauseButton();
+      schedule();
     });
-
-    // Only rotate while the showcase is on screen.
     if ("IntersectionObserver" in window) {
       new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) restart(); else stop();
-        });
-      }, { threshold: 0.2 }).observe(showcase);
-    } else {
-      restart();
-    }
+        inView = entries[0].isIntersecting;
+        schedule();
+      }, { threshold: .2 }).observe(showcase);
+    } else { inView = true; }
+    syncPauseButton();
+    show(0);
   }
 
-  /* ---------------------------------------------------------------
-   * "What do you need?" picker (ARIA tabs)
-   * ------------------------------------------------------------- */
+  /* Static CSS dots do most of the work. Only the small active area is
+   * painted, with fewer frames on touch screens and no loop in reduced motion. */
+  function initDotField() {
+    const canvas = document.getElementById("dotGrid");
+    const ctx = canvas && canvas.getContext("2d", { alpha: true });
+    if (!ctx) return;
+    const coarse = window.matchMedia("(pointer: coarse)");
+    let width = 0, height = 0, frame = 0, last = 0;
+    let x = 0, y = 0, targetX = 0, targetY = 0;
+    let active = false, touchUntil = 0;
+    const ripples = [];
 
-  function initPicker() {
-    $$("[data-picker]").forEach(function (picker) {
-      const tabs = $$("[data-picker-tab]", picker);
-      const panels = $$("[data-picker-panel]", picker);
+    function resize() {
+      width = innerWidth;
+      height = innerHeight;
+      const dpr = Math.min(devicePixelRatio || 1, 1.5);
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      x = targetX = width * .7;
+      y = targetY = height * .4;
+    }
 
-      function select(nextTab, moveFocus) {
-        tabs.forEach(function (tab) {
-          const active = tab === nextTab;
-          tab.setAttribute("aria-selected", String(active));
-          tab.tabIndex = active ? 0 : -1;
-        });
-        panels.forEach(function (panel) {
-          const active = panel.id === nextTab.getAttribute("aria-controls");
-          panel.hidden = !active;
-          if (active && !prefersReducedMotion()) {
-            panel.classList.remove("is-swapping");
-            void panel.offsetWidth;
-            panel.classList.add("is-swapping");
-          }
-        });
-        if (moveFocus) nextTab.focus();
-
-        // On narrow screens, bring the answer into view.
-        if (window.innerWidth < 1080) {
-          const panel = document.getElementById(nextTab.getAttribute("aria-controls"));
-          if (panel) {
-            const rect = panel.getBoundingClientRect();
-            if (rect.top > window.innerHeight * 0.75 || rect.top < 0) {
-              panel.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
-            }
-          }
+    function draw(time) {
+      frame = 0;
+      const touch = coarse.matches;
+      if (time - last < (touch ? 60 : 30)) { frame = requestAnimationFrame(draw); return; }
+      last = time;
+      if (!active || (touch && time > touchUntil)) {
+        targetX = width * (.62 + Math.sin(time * .0002) * .22);
+        targetY = height * (.4 + Math.cos(time * .00017) * .2);
+      }
+      x += (targetX - x) * .1;
+      y += (targetY - y) * .1;
+      ctx.clearRect(0, 0, width, height);
+      const radius = touch ? 120 : 190;
+      const glow = ctx.createRadialGradient(x, y, 0, x, y, radius);
+      glow.addColorStop(0, "rgba(184,216,255,.13)");
+      glow.addColorStop(1, "rgba(184,216,255,0)");
+      ctx.fillStyle = glow;
+      ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+      for (let py = Math.floor((y - radius) / 36) * 36 + 18; py < y + radius; py += 36) {
+        for (let px = Math.floor((x - radius) / 36) * 36 + 18; px < x + radius; px += 36) {
+          const influence = Math.max(0, 1 - Math.hypot(px - x, py - y) / radius);
+          if (!influence) continue;
+          const strength = influence * influence;
+          ctx.beginPath();
+          ctx.arc(px, py, 1 + strength * 2, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(224,239,255," + strength * .8 + ")";
+          ctx.fill();
         }
       }
-
-      tabs.forEach(function (tab, i) {
-        tab.addEventListener("click", function () { select(tab, false); });
-        tab.addEventListener("keydown", function (event) {
-          let next = null;
-          if (event.key === "ArrowDown" || event.key === "ArrowRight") next = tabs[(i + 1) % tabs.length];
-          if (event.key === "ArrowUp" || event.key === "ArrowLeft") next = tabs[(i - 1 + tabs.length) % tabs.length];
-          if (event.key === "Home") next = tabs[0];
-          if (event.key === "End") next = tabs[tabs.length - 1];
-          if (next) {
-            event.preventDefault();
-            select(next, true);
-          }
-        });
-      });
+      for (let i = ripples.length - 1; i >= 0; i--) {
+        const ripple = ripples[i];
+        const age = (time - ripple.time) / 1100;
+        if (age > 1) { ripples.splice(i, 1); continue; }
+        ctx.beginPath();
+        ctx.arc(ripple.x, ripple.y, 12 + age * 150, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(223,236,255," + (1 - age) * .2 + ")";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+      frame = requestAnimationFrame(draw);
+    }
+    function restart() {
+      cancelAnimationFrame(frame);
+      frame = 0;
+      ctx.clearRect(0, 0, width, height);
+      if (!document.hidden && !prefersReducedMotion()) frame = requestAnimationFrame(draw);
+    }
+    window.addEventListener("pointermove", function (event) {
+      if (coarse.matches) return;
+      targetX = event.clientX; targetY = event.clientY; active = true;
+    }, { passive: true });
+    window.addEventListener("pointerdown", function (event) {
+      if (prefersReducedMotion() || document.body.classList.contains("is-modal-open")) return;
+      targetX = event.clientX; targetY = event.clientY; active = true;
+      touchUntil = performance.now() + 1600;
+      if (ripples.length >= 3) ripples.shift();
+      ripples.push({ x: targetX, y: targetY, time: performance.now() });
+    }, { passive: true });
+    document.addEventListener("pointerleave", function () { active = false; });
+    window.addEventListener("blur", function () { active = false; });
+    window.addEventListener("resize", function () {
+      // Mobile browser bars resize height during scroll; don't continually clear the canvas.
+      if (Math.abs(innerWidth - width) > 3 || Math.abs(innerHeight - height) > 120) { resize(); restart(); }
     });
+    document.addEventListener("visibilitychange", restart);
+    reducedMotionQuery.addEventListener("change", restart);
+    resize();
+    restart();
   }
 
   /* ---------------------------------------------------------------
@@ -778,7 +823,7 @@
   window.addEventListener("keydown", handleKeyDown);
 
   initShowcase();
-  initPicker();
+  initDotField();
   initFilters();
   initReveal();
   initScrollChrome();
