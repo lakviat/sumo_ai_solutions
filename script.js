@@ -512,12 +512,13 @@
 
     function schedule() {
       stop();
-      if (userPaused || hovered || focused || !inView || document.hidden || prefersReducedMotion()) return;
+      if (userPaused || hovered || focused || !inView || document.hidden || prefersReducedMotion() || document.body.classList.contains("is-modal-open")) return;
       timer = window.setTimeout(function () { show(index + 1); }, 6000);
     }
 
     function syncPauseButton() {
       if (!pauseButton) return;
+      pauseButton.hidden = prefersReducedMotion();
       pauseButton.classList.toggle("is-paused", userPaused);
       pauseButton.setAttribute("aria-label", userPaused ? "Resume project rotation" : "Pause project rotation");
     }
