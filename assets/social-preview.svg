@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#376387"/><stop offset="1" stop-color="#153b50"/></linearGradient><pattern id="dots" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="5" cy="5" r="1" fill="#bee7ed" opacity=".24"/></pattern></defs>
+  <path fill="url(#bg)" d="M0 0h1200v630H0z"/><path fill="url(#dots)" d="M0 0h1200v630H0z"/>
+  <text x="65" y="85" font-family="sans-serif" font-size="30" font-weight="700" fill="#f9faf5">SUMO AI Solutions<tspan fill="#ffc3a7">.</tspan></text>
+  <text x="65" y="185" font-family="sans-serif" font-size="15" letter-spacing="3" fill="#c2dfe9">SMALL BUSINESS. BIG POSSIBILITIES.</text>
+  <g font-family="sans-serif" font-weight="700" font-size="80" letter-spacing="-4"><text x="60" y="288" fill="#f9faf5">A better website.</text><text x="60" y="385" fill="#ffc3a7">A smarter business.</text></g>
+  <text x="65" y="455" font-family="sans-serif" font-size="23" fill="#c6dce6">Websites. Mobile apps. AI. Made simple.</text>
+  <rect x="65" y="512" width="233" height="54" rx="10" fill="#ffc3a7"/>
+  <text x="90" y="546" font-family="sans-serif" font-size="17" font-weight="700" fill="#173b44">Let's build your next idea.</text>
+  <text x="1135" y="550" text-anchor="end" font-family="sans-serif" font-size="18" fill="#c6dce6">sumoaisolutions.com</text>
+  <g stroke="#a9e3ee" stroke-width="2" fill="none" opacity=".55"><circle cx="1050" cy="173" r="60"/><path d="M1050 93v160M970 173h160"/></g>
+</svg>

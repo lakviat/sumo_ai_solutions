@@ -1,17 +1,9 @@
 (function () {
   const canvas = document.getElementById("dotGrid");
 
-  if (!canvas) {
-    return;
-  }
-
-  const ctx =
+  const ctx = canvas && (
     canvas.getContext("2d", { alpha: true, desynchronized: true }) ||
-    canvas.getContext("2d");
-
-  if (!ctx) {
-    return;
-  }
+    canvas.getContext("2d"));
 
   const revealElements = Array.from(document.querySelectorAll("[data-reveal]"));
   const parallaxElements = Array.from(document.querySelectorAll("[data-parallax-depth]"));
@@ -97,6 +89,22 @@
   };
   const defaultConsultationStatus = consultationStatus ? consultationStatus.textContent : "";
   const defaultConsultationSubmitLabel = consultationSubmitButton ? consultationSubmitButton.textContent : "";
+  let consultationReturnFocus = null;
+  let portfolioReturnFocus = null;
+
+  function syncModalState() {
+    const isOpen = Boolean(
+      (consultationModal && !consultationModal.hidden) ||
+      (portfolioPreviewModal && !portfolioPreviewModal.hidden)
+    );
+    document.body.classList.toggle("is-modal-open", isOpen);
+    const pageShell = document.querySelector(".page-shell");
+    if (pageShell) pageShell.inert = isOpen;
+  }
+
+  function restoreFocus(element) {
+    if (element && element.isConnected) element.focus({ preventScroll: true });
+  }
 
   function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
@@ -430,6 +438,7 @@
 
   function updateCanvasSize() {
     updateQuality();
+    if (!ctx) return;
 
     state.width = window.innerWidth;
     state.height = window.innerHeight;
@@ -507,9 +516,11 @@
   }
 
   function addRipple(x, y) {
-    if (!state.mobileAmbientMode) {
+    if (state.reducedMotion) {
       return;
     }
+
+    if (state.ripples.length >= 3) state.ripples.shift();
 
     state.ripples.push({
       x: x,
@@ -768,6 +779,7 @@
   }
 
   function renderFrame(time) {
+    if (!ctx) return;
     updatePointer(time);
     renderScene(time);
     applyParallax();
@@ -797,6 +809,7 @@
   }
 
   function startAnimation() {
+    if (!ctx) return;
     if (state.reducedMotion) {
       stopAnimation();
       renderFrame(window.performance.now());
@@ -820,6 +833,8 @@
 
       return;
     }
+
+    document.documentElement.classList.add("motion-ready");
 
     const observer = new IntersectionObserver(
       function (entries) {
@@ -883,28 +898,30 @@
     initHighlightRotation();
   }
 
-  function openConsultationModal() {
+  function openConsultationModal(event) {
     if (!consultationModal) {
       return;
     }
 
+    const source = event && event.currentTarget;
+    consultationReturnFocus = document.activeElement;
     if (portfolioPreviewModal && !portfolioPreviewModal.hidden) {
+      consultationReturnFocus = portfolioReturnFocus;
       closePortfolioPreviewModal();
     }
 
     consultationModal.hidden = false;
-    document.body.classList.add("is-modal-open");
+    syncModalState();
+
+    const topic = source && source.dataset ? source.dataset.consultationTopic : "";
+    const label = consultationModal.querySelector(".consultation-head .eyebrow");
+    if (label) label.textContent = topic || "Book a Consultation";
 
     setConsultationStatus(defaultConsultationStatus, "");
     setConsultationSubmitting(false);
 
-    const firstInput = consultationModal.querySelector("input, textarea");
-
-    if (firstInput) {
-      window.setTimeout(function () {
-        firstInput.focus();
-      }, 40);
-    }
+    const title = document.getElementById("consultationTitle");
+    if (title) title.focus({ preventScroll: true });
   }
 
   function closeConsultationModal() {
@@ -914,9 +931,8 @@
 
     consultationModal.hidden = true;
 
-    if (!portfolioPreviewModal || portfolioPreviewModal.hidden) {
-      document.body.classList.remove("is-modal-open");
-    }
+    syncModalState();
+    restoreFocus(consultationReturnFocus);
   }
 
   function openPortfolioPreviewModal(source) {
@@ -940,6 +956,8 @@
       return;
     }
 
+    portfolioReturnFocus = trigger;
+
     if (portfolioPreviewTitle) {
       portfolioPreviewTitle.textContent = previewTitle;
     }
@@ -952,14 +970,15 @@
       portfolioPreviewLiveLink.href = previewUrl;
     }
 
-    if (previewMode === "image" && /^https?:\/\//.test(previewImageUrl)) {
+    const imageUrl = previewImageUrl ? new URL(previewImageUrl, document.baseURI) : null;
+    if (previewMode === "image" && imageUrl && /^https?:$/.test(imageUrl.protocol)) {
       if (portfolioPreviewFrame) {
         portfolioPreviewFrame.hidden = true;
-        portfolioPreviewFrame.src = "";
+        portfolioPreviewFrame.removeAttribute("src");
       }
 
       if (portfolioPreviewImage) {
-        portfolioPreviewImage.src = previewImageUrl;
+        portfolioPreviewImage.src = imageUrl.href;
         portfolioPreviewImage.alt = previewTitle + " preview image";
         portfolioPreviewImage.hidden = false;
       }
@@ -970,7 +989,7 @@
     } else {
       if (portfolioPreviewImage) {
         portfolioPreviewImage.hidden = true;
-        portfolioPreviewImage.src = "";
+        portfolioPreviewImage.removeAttribute("src");
         portfolioPreviewImage.alt = "";
       }
 
@@ -985,7 +1004,10 @@
     }
 
     portfolioPreviewModal.hidden = false;
-    document.body.classList.add("is-modal-open");
+    syncModalState();
+    if (portfolioPreviewTitle) portfolioPreviewTitle.focus({ preventScroll: true });
+    const frameWrap = portfolioPreviewModal.querySelector(".portfolio-preview-frame-wrap");
+    if (frameWrap) frameWrap.scrollTop = 0;
   }
 
   function closePortfolioPreviewModal() {
@@ -997,12 +1019,12 @@
 
     if (portfolioPreviewFrame) {
       portfolioPreviewFrame.hidden = false;
-      portfolioPreviewFrame.src = "";
+      portfolioPreviewFrame.removeAttribute("src");
     }
 
     if (portfolioPreviewImage) {
       portfolioPreviewImage.hidden = true;
-      portfolioPreviewImage.src = "";
+      portfolioPreviewImage.removeAttribute("src");
       portfolioPreviewImage.alt = "";
     }
 
@@ -1010,9 +1032,8 @@
       portfolioPreviewNote.hidden = true;
     }
 
-    if (!consultationModal || consultationModal.hidden) {
-      document.body.classList.remove("is-modal-open");
-    }
+    syncModalState();
+    restoreFocus(portfolioReturnFocus);
   }
 
   async function handleConsultationSubmit(event) {
@@ -1078,9 +1099,7 @@
 
     setPointer(event.clientX, event.clientY, forceFocus);
 
-    if (forceFocus) {
-      addRipple(event.clientX, event.clientY);
-    }
+    if (!document.body.classList.contains("is-modal-open")) addRipple(event.clientX, event.clientY);
   }
 
   function updateMobileNavBalance() {
@@ -1245,6 +1264,27 @@
   }
 
   function handleKeyDown(event) {
+    const activeModal = consultationModal && !consultationModal.hidden
+      ? consultationModal
+      : portfolioPreviewModal && !portfolioPreviewModal.hidden ? portfolioPreviewModal : null;
+
+    if (event.key === "Tab" && activeModal) {
+      const controls = Array.from(activeModal.querySelectorAll(
+        'a[href], button:not(:disabled), input:not(:disabled), textarea:not(:disabled), iframe, [tabindex="0"]'
+      )).filter(function (element) { return element.getClientRects().length > 0; });
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (!first) return;
+      if (event.shiftKey && (document.activeElement === first || !controls.includes(document.activeElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !controls.includes(document.activeElement))) {
+        event.preventDefault();
+        first.focus();
+      }
+      return;
+    }
+
     if (event.key !== "Escape") {
       return;
     }

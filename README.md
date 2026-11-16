@@ -1,283 +1,107 @@
 # SUMO AI Solutions
 
-![SUMO AI Solutions banner](assets/sketches/sumo-banner.svg)
+![SUMO AI Solutions: websites, apps, and AI for small businesses](assets/social-preview.png)
 
-## ⚔️ About SUMO AI Solutions
+**A better website. A smarter business.**
 
-**SUMO AI Solutions** is a modern technology partner focused on building, improving, and staffing high-value digital systems for businesses that need real execution.
+We help small businesses get online, bring app ideas to life, and spend less time on repetitive work. Based in **Miami, Florida**, we work with clients everywhere.
 
-We help clients launch and scale:
+[Visit our website](https://sumoaisolutions.com/) | [Explore the portfolio](https://sumoaisolutions.com/portfolio/)
 
-- 🤖 **AI automation systems**
-- 🌐 **Websites and web applications**
-- 📱 **Mobile apps**
-- 🛠️ **IT systems and operations**
-- 🧭 **Technical consulting and embedded delivery**
-- 👥 **IT recruiting and talent support**
+## What We Do
 
-Our positioning is straightforward: we are not only a website studio. We operate across **digital product development, AI business integration, technical consulting, and IT talent solutions**.
-
----
-
-## 🚀 What We Offer
-
-### 🧱 Full Service Coverage
-
-SUMO AI Solutions is designed to support companies that need more than one isolated service. We provide a broad IT and software delivery offering that can cover strategy, design, implementation, optimization, and talent support.
-
-- 🌐 **Website creation and website development**
-- 🖥️ **Web application development**
-- 📱 **Mobile app development for iOS and Android**
-- 🤖 **AI integration for business**
-- ⚙️ **Business automation and workflow optimization**
-- 🧭 **Software consulting and IT consulting**
-- 🏢 **Custom business systems and internal tools**
-- 🔌 **Systems integration and modernization**
-- 👥 **IT recruiting and technical talent support**
-
-### 🤖 AI Automation & Intelligent Systems
-
-We design practical AI solutions that improve speed, decision-making, and operational efficiency.
-
-- Workflow automation
-- AI copilots and assistants
-- Internal AI tools
-- AI-enhanced support flows
-- AI implementation for existing businesses
-- AI process automation
-- AI-powered knowledge systems
-- Process optimization
-- Business system integrations
-- Operational efficiency improvements
-
-### 🌐 Website & Web Application Development
-
-We build modern digital products from scratch and improve existing platforms.
-
-- Website design and redesign
-- Marketing websites
-- Landing pages
-- Business websites
-- Corporate websites
-- Professional service websites
-- Conversion-focused web pages
-- Ecommerce presentation layers
-- Customer portals
-- Dashboards
-- Internal tools
-- SaaS interfaces
-- Operations dashboards
-- Custom web applications
-
-### 📱 Mobile App Development
-
-We support mobile product strategy and delivery across:
-
-- iOS applications
-- Android applications
-- cross-platform mobile product planning
-- companion apps for business systems
-- mobile interfaces for field teams and operations
-- customer-facing mobile experiences
-- internal operational mobile tools
-
-### 🛠️ IT Services, Systems, & Integration
-
-We also support the business-critical systems behind the customer-facing product layer.
-
-- Custom business systems
-- Internal operations platforms
-- Workflow systems
-- CRM and process integrations
-- Systems integration
-- Legacy modernization
-- Process improvement
-- Technical implementation support
-- Infrastructure-minded solution planning
-
-### 🧭 Consulting & Embedded Technical Teams
-
-We work as a delivery partner, implementation partner, or embedded team extension.
-
-- Technical consulting
-- Software consulting
-- IT consulting
-- Solution architecture
-- Systems modernization
-- Implementation support
-- Fractional technical leadership
-- Project rescue and delivery stabilization
-- Product and systems planning
-
-### 👥 IT Recruiting & Talent Solutions
-
-We also help businesses strengthen technical teams with focused recruiting support in the IT sphere.
-
-- Technical recruiting
-- Candidate sourcing
-- Screening support
-- Team augmentation
-- Delivery-minded staffing support
-- Technical role definition support
-- Recruiting help for growing software and IT teams
-
-### 📦 Typical Engagement Types
-
-Clients work with SUMO AI Solutions for needs such as:
-
-- building a website from scratch
-- redesigning or modernizing an existing website
-- creating a custom web application
-- building an iOS or Android app
-- integrating AI into business workflows
-- automating repetitive operational tasks
-- improving efficiency with internal tools and systems
-- getting senior technical consulting on a software initiative
-- improving delivery quality, architecture, or execution
-- finding technical talent to support ongoing work
-
----
-
-## 🏢 Who We Work With
-
-SUMO AI Solutions is structured to support a wide range of client environments:
-
-- startups
-- local businesses
-- founder-led ventures
-- growth-stage companies
-- enterprise and corporate teams
-
-Whether the need is a clean new website, a full business system, AI process automation, or technical recruiting support, the goal stays the same: **deliver useful systems that create leverage**.
-
----
-
-## 🧠 Business Pillars
-
-### 1. Digital Product Development
-
-We build:
-
-- websites from scratch
-- landing pages
-- business websites
-- web apps
-- mobile apps
-- business systems
-- client-facing digital experiences
-
-### 2. AI Business Integration
-
-We help organizations apply AI in ways that are practical and measurable:
-
-- automate repetitive workflows
-- improve internal processes
-- streamline operations
-- add intelligence to existing systems
-- deploy practical AI tools inside organizations
-- support revenue and efficiency goals
-
-### 3. Consulting, Delivery, and Recruiting
-
-We support businesses not only with software, but with execution capacity:
-
-- consulting
-- software and IT services
-- systems integration support
-- technical delivery support
-- IT recruiting support
-
----
-
-## 🎯 Brand Direction
-
-The SUMO AI Solutions brand should feel like:
-
-- precise
-- disciplined
-- modern
-- premium
-- dependable
-- technical without being cold
-
-The creative direction we are exploring combines:
-
-- **samurai-inspired discipline**
-- **clean digital systems aesthetics**
-- **AI infrastructure cues**
-- **strong, iconic geometry**
-
-The sword reference is being explored through the idea of a **samurai handle / tsuka-inspired wrap pattern** that can become a memorable icon for the website, app window, or future brand mark.
-
----
-
-## 🖼️ First Sketch Concepts
-
-These are early concept sketches only.
-
-### Brand / Icon Concepts
-
-| Concept | Preview | Direction |
-| --- | --- | --- |
-| Concept A | ![Concept A](assets/sketches/logo-concept-tsuka-grid.svg) | A geometric handle-wrap motif with a strong central spine and AI-like structure. |
-| Concept B | ![Concept B](assets/sketches/logo-concept-tsuka-crest.svg) | A crest-style symbol with woven handle energy and a more emblematic feel. |
-| Window Icon | ![Window icon concept](assets/sketches/logo-concept-window-icon.svg) | A simplified square app icon concept designed for a browser tab, app tile, or OS window icon. |
-
-### AI Solution Sketches
-
-| Solution | Preview |
+| Service | How we help |
 | --- | --- |
-| AI Automation | ![AI Automation sketch](assets/sketches/ai-solution-automation.svg) |
-| AI Recruiting | ![AI Recruiting sketch](assets/sketches/ai-solution-recruiting.svg) |
-| AI Systems & Ops | ![AI Systems sketch](assets/sketches/ai-solution-systems.svg) |
+| **Websites & web apps** | Business websites, landing pages, online stores, booking tools, customer portals, and custom web applications. |
+| **Mobile apps** | iPhone and Android apps for customers, teams, and new business ideas. |
+| **AI for your business** | Customer assistants, AI-powered tools, and practical help using AI in everyday work. |
+| **Business automation** | Connect your tools, simplify follow-ups, reduce manual tasks, and save time. |
+| **IT consulting & support** | Clear advice, troubleshooting, software improvements, system integration, and hands-on implementation. |
+| **IT recruiting & talent support** | Find developers and IT specialists, define roles, source candidates, and strengthen your team. |
 
----
+We can start from scratch or improve what you already have. You don't need a technical brief to start a conversation.
 
-## 🧩 Website Notes
+## How We Work
 
-This repository currently contains a static marketing site for GitHub Pages deployment.
+1. **Tell us your idea.** A conversation about your business and what you need.
+2. **Get a clear plan.** Agree on the scope, price, and timing before building.
+3. **Bring it to life.** Design, build, review together, and launch.
 
-### Technical setup
+Every service card and consultation button opens the same inquiry form. It accepts a name, email, optional phone number, project description, and optional attachments. Reference links can go directly in the description.
 
-- `index.html` – homepage structure
-- `style.css` – styling, layout, responsive behavior
-- `script.js` – interaction layer and animated background logic
-- `portfolio/index.html` – reserved portfolio route
-- `CNAME` – custom domain mapping
+## Portfolio
 
-### Current site direction
+Our project gallery currently features **TV Mount 360** and **Jobs in Kyrgyzstan**. The separate inspiration gallery credits independent personal website designs; these are **not represented as SUMO projects**.
 
-- dark premium visual style
-- responsive landing page layout
-- lightweight animated background
-- business-focused messaging
-- portfolio path reserved for future expansion
+Project links were checked on **November 16, 2026**:
 
----
+| Website | Result | Presentation |
+| --- | --- | --- |
+| TV Mount 360 | HTTP 200; expected site present | Local thumbnail, on-demand live preview |
+| Jobs in Kyrgyzstan | HTTP 200; expected site present | Local thumbnail, on-demand live preview |
+| Indi Harris | HTTP 200; embedding restricted | Credited inspiration, scrollable image preview |
+| Ollivere | HTTP 200; embedding restricted | Credited inspiration, scrollable image preview |
+| Nick Velten | HTTP 200; expected site present | Credited inspiration, scrollable image preview |
+| Chicago Appliance Repair | HTTP 404, GitHub Pages "Site not found" | Removed from the gallery and sitemap |
 
-## 🔭 Planned Expansion
+Preview images are stored locally, rather than loading several external websites when someone opens the page. Every preview includes an **Open Live Site** link. External sites can change or restrict embedding, so check them again before new ad campaigns.
 
-Future additions may include:
+The homepage's illustrated website and mobile screen are explicitly labeled **design concepts**, not client projects.
 
-- a full portfolio and case study system
-- deeper AI service pages
-- recruiting and staffing landing pages
-- industry-specific solution pages
-- refined logo and favicon package
-- polished brand guidelines
+## Website Setup
 
----
+A build-free static website hosted on GitHub Pages. No application server or production package installation is required.
 
-## 🤝 Contact Direction
+| File | Purpose |
+| --- | --- |
+| `index.html` | Small-business homepage, service cards, portfolio highlights, consultation form |
+| `portfolio/index.html` | Project gallery, independent inspiration, preview dialogs |
+| `style.css` | Shared design, responsive layouts, dialog styles, reduced-motion rules |
+| `script.js` | Dot-grid animation, dialogs, attachment handling, form submission, conversion event |
+| `assets/portfolio/` | Locally stored project thumbnails and full-page inspiration previews |
+| `assets/fonts/` | Self-hosted Manrope font and its SIL Open Font License |
+| `assets/social-preview.png` | Social sharing image; editable SVG source sits alongside it |
+| `backend/consultation-handler.gs` | Existing Google Apps Script backend |
+| `sitemap.xml`, `robots.txt` | Search-engine discovery |
+| `CNAME` | Existing custom domain |
+| `googlebb0f81e2e8e23f9a.html` | Google site verification |
+| `tests/site.test.cjs` | Dependency-free structure and integration checks |
 
-SUMO AI Solutions is designed to serve clients that need:
+### Local Preview
 
-- a serious digital partner
-- modern websites and apps
-- AI automation for business
-- software consulting and IT consulting
-- systems integration and process improvement
-- consulting and implementation support
-- recruiting and technical staffing help
+From the repository root:
 
-If the goal is to build cleaner systems, move faster, and operate more intelligently, that is exactly where SUMO AI Solutions fits.
+```sh
+python3 -m http.server 9090
+```
+
+Open [the homepage](http://localhost:9090/) or [the portfolio](http://localhost:9090/portfolio/).
+
+### Checks
+
+```sh
+node --check script.js
+node --test tests/site.test.cjs
+```
+
+Also review desktop and mobile layouts, keyboard navigation, reduced-motion mode, all consultation triggers, and every portfolio preview. Test form responses with a mocked endpoint to avoid sending test emails or recording artificial ad conversions.
+
+### Preserved Integrations
+
+- Google Ads base tag: `AW-17948229197`, present on both public pages.
+- Existing lead conversion destination: `AW-17948229197/VZTvCKPwzogcEM38sO5C`.
+- Existing form payload, attachment limits, Google Apps Script endpoint, and submission flow.
+- Existing search keywords, canonical URLs, structured service data, and Google verification file.
+- Existing desktop pointer interaction and lightweight touch-screen ambient motion.
+
+The redesign does not install a Meta Pixel, add WhatsApp contact information, or change ad-account configuration. Those need the relevant account details and contact number.
+
+### Deployment
+
+Publish the repository root from `main` using the existing GitHub Pages configuration. Both HTML files use the same versioned CSS and JavaScript URLs; update those versions together when changing shared assets. The sitemap includes only the two published page routes.
+
+Core content renders without waiting for JavaScript. Fonts and preview images are served with the site; third-party websites load only after a visitor requests a live preview. Motion respects reduced-motion preferences and pauses when the tab is hidden.
+
+## Start a Conversation
+
+Use **Book a Consultation** on [sumoaisolutions.com](https://sumoaisolutions.com/). Tell us what you're building, what needs improving, or where you could use a hand.
