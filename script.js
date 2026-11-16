@@ -1,37 +1,22 @@
 (function () {
-  const canvas = document.getElementById("dotGrid");
+  "use strict";
 
-  const ctx = canvas && (
-    canvas.getContext("2d", { alpha: true, desynchronized: true }) ||
-    canvas.getContext("2d"));
+  const $ = (selector, root) => (root || document).querySelector(selector);
+  const $$ = (selector, root) => Array.from((root || document).querySelectorAll(selector));
 
-  const revealElements = Array.from(document.querySelectorAll("[data-reveal]"));
-  const parallaxElements = Array.from(document.querySelectorAll("[data-parallax-depth]"));
-  const rotatingItems = Array.from(document.querySelectorAll("[data-rotate-item]"));
-  const siteNavs = Array.from(document.querySelectorAll(".site-nav"));
-  const inPageAnchors = Array.from(document.querySelectorAll('a[href^="#"]'));
-  const previewFrames = Array.from(document.querySelectorAll("iframe[data-preview-frame]"));
-  const openPortfolioPreviewButtons = Array.from(document.querySelectorAll("[data-open-preview]"));
-  const portfolioPreviewModal = document.getElementById("portfolioPreviewModal");
-  const closePortfolioPreviewButtons = Array.from(
-    document.querySelectorAll("[data-close-portfolio-preview]")
-  );
-  const portfolioPreviewFrame = document.getElementById("portfolioPreviewFrame");
-  const portfolioPreviewImage = document.getElementById("portfolioPreviewImage");
-  const portfolioPreviewNote = document.getElementById("portfolioPreviewNote");
-  const portfolioPreviewTitle = document.getElementById("portfolioPreviewTitle");
-  const portfolioPreviewDomain = document.getElementById("portfolioPreviewDomain");
-  const portfolioPreviewLiveLink = document.getElementById("portfolioPreviewLiveLink");
-  const openConsultationButtons = Array.from(document.querySelectorAll("[data-open-consultation]"));
+  const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const consultationModal = document.getElementById("consultationModal");
-  const closeConsultationButtons = Array.from(document.querySelectorAll("[data-close-consultation]"));
   const consultationForm = document.getElementById("consultationForm");
   const consultationStatus = document.getElementById("consultationStatus");
   const consultationSubmitButton = consultationForm
     ? consultationForm.querySelector('button[type="submit"]')
     : null;
-  const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const coarsePointerQuery = window.matchMedia("(pointer: coarse)");
+  const portfolioPreviewModal = document.getElementById("portfolioPreviewModal");
+  const portfolioPreviewImage = document.getElementById("portfolioPreviewImage");
+  const portfolioPreviewTitle = document.getElementById("portfolioPreviewTitle");
+  const portfolioPreviewDomain = document.getElementById("portfolioPreviewDomain");
+  const portfolioPreviewLiveLink = document.getElementById("portfolioPreviewLiveLink");
+
   const consultationConfig = {
     endpoint: consultationForm ? String(consultationForm.dataset.endpoint || "").trim() : "",
     maxAttachmentBytes: 10 * 1024 * 1024,
@@ -49,78 +34,22 @@
       "application/octet-stream"
     ]
   };
-  const guidedSectionIds = {
-    services: true,
-    about: true,
-    solutions: true
-  };
-  const spotlightTimers = new WeakMap();
-  const guidedCardTimers = new WeakMap();
 
-  const state = {
-    width: 0,
-    height: 0,
-    dpr: Math.min(window.devicePixelRatio || 1, 2),
-    spacing: 44,
-    baseRadius: 1.28,
-    activeRadius: 2.8,
-    influenceRadius: 170,
-    particleCount: 18,
-    frameInterval: 1000 / 36,
-    reducedMotion: reducedMotionQuery.matches,
-    coarsePointer: coarsePointerQuery.matches || window.innerWidth < 900,
-    mobileAmbientMode: false,
-    parallaxEnabled: false,
-    points: [],
-    particles: [],
-    ripples: [],
-    pointer: {
-      x: 0,
-      y: 0,
-      targetX: 0,
-      targetY: 0,
-      active: false
-    },
-    rafId: 0,
-    lastFrameTime: 0,
-    rotationTimerId: 0,
-    activeHighlightIndex: 0,
-    touchFocusUntil: 0
-  };
   const defaultConsultationStatus = consultationStatus ? consultationStatus.textContent : "";
   const defaultConsultationSubmitLabel = consultationSubmitButton ? consultationSubmitButton.textContent : "";
+  const defaultConsultationEyebrow = "Book a Consultation";
+  let activeConsultationTopic = "";
   let consultationReturnFocus = null;
   let portfolioReturnFocus = null;
 
-  function syncModalState() {
-    const isOpen = Boolean(
-      (consultationModal && !consultationModal.hidden) ||
-      (portfolioPreviewModal && !portfolioPreviewModal.hidden)
-    );
-    document.body.classList.toggle("is-modal-open", isOpen);
-    const pageShell = document.querySelector(".page-shell");
-    if (pageShell) pageShell.inert = isOpen;
+  function prefersReducedMotion() {
+    return reducedMotionQuery.matches;
   }
 
-  function restoreFocus(element) {
-    if (element && element.isConnected) element.focus({ preventScroll: true });
-  }
-
-  function clamp(value, min, max) {
-    return Math.max(min, Math.min(max, value));
-  }
-
-  function lerp(start, end, factor) {
-    return start + (end - start) * factor;
-  }
-
-  function smoothstep(value) {
-    return value * value * (3 - 2 * value);
-  }
-
-  function randomBetween(min, max) {
-    return min + Math.random() * (max - min);
-  }
+  /* ---------------------------------------------------------------
+   * Consultation form (submission logic preserved from the previous
+   * version: same endpoint, payload fields, limits, and conversion).
+   * ------------------------------------------------------------- */
 
   function getFileExtension(fileName) {
     const segments = String(fileName || "").split(".");
@@ -289,6 +218,16 @@
 
     validateConsultationFiles(files);
 
+    const interest = String(formData.get("interest") || "").trim();
+    const contextLines = [];
+    if (interest) contextLines.push("Interested in: " + interest);
+    if (activeConsultationTopic && activeConsultationTopic !== interest) {
+      contextLines.push("Started from: " + activeConsultationTopic);
+    }
+    const fullDescription = contextLines.length
+      ? contextLines.join("\n") + "\n\n" + projectDescription
+      : projectDescription;
+
     return {
       source: window.location.hostname || "sumoaisolutions.com",
       pageUrl: window.location.href,
@@ -297,8 +236,10 @@
       fullName: (firstName + " " + lastName).trim(),
       email: email,
       phone: phone,
-      message: projectDescription,
-      projectDescription: projectDescription,
+      message: fullDescription,
+      projectDescription: fullDescription,
+      interest: interest,
+      topic: activeConsultationTopic,
       attachments: await serializeAttachments(files)
     };
   }
@@ -384,539 +325,55 @@
     }
   }
 
-  function updateQuality() {
-    state.reducedMotion = reducedMotionQuery.matches;
-    state.coarsePointer = coarsePointerQuery.matches || window.innerWidth < 900;
-    state.mobileAmbientMode = state.coarsePointer && !state.reducedMotion;
-    state.spacing = state.mobileAmbientMode ? 58 : state.coarsePointer ? 54 : 44;
-    state.baseRadius = state.mobileAmbientMode ? 1.18 : state.coarsePointer ? 1.12 : 1.28;
-    state.activeRadius = state.mobileAmbientMode ? 2.18 : state.coarsePointer ? 1.95 : 2.8;
-    state.influenceRadius = state.reducedMotion ? 0 : state.mobileAmbientMode ? 128 : state.coarsePointer ? 92 : 170;
-    state.particleCount = state.reducedMotion ? 0 : state.mobileAmbientMode ? 0 : state.coarsePointer ? 0 : 18;
-    state.frameInterval = state.mobileAmbientMode ? 1000 / 14 : state.coarsePointer ? 1000 / 24 : 1000 / 36;
-    state.parallaxEnabled = !state.reducedMotion && !state.coarsePointer;
-  }
+  /* ---------------------------------------------------------------
+   * Modals
+   * ------------------------------------------------------------- */
 
-  function buildGrid() {
-    state.points = [];
-
-    const cols = Math.ceil(state.width / state.spacing) + 1;
-    const rows = Math.ceil(state.height / state.spacing) + 1;
-    const offsetX = (state.width - (cols - 1) * state.spacing) / 2;
-    const offsetY = (state.height - (rows - 1) * state.spacing) / 2;
-
-    for (let row = 0; row < rows; row += 1) {
-      for (let col = 0; col < cols; col += 1) {
-        state.points.push({
-          x: offsetX + col * state.spacing,
-          y: offsetY + row * state.spacing,
-          phase: row * 0.31 + col * 0.23
-        });
-      }
-    }
-  }
-
-  function createParticle() {
-    return {
-      x: randomBetween(0, state.width),
-      y: randomBetween(0, state.height),
-      vx: randomBetween(-0.08, 0.08),
-      vy: randomBetween(-0.06, 0.06),
-      size: randomBetween(1.1, 2),
-      alpha: randomBetween(0.18, 0.42),
-      phase: randomBetween(0, Math.PI * 2)
-    };
-  }
-
-  function buildParticles() {
-    state.particles = [];
-
-    for (let index = 0; index < state.particleCount; index += 1) {
-      state.particles.push(createParticle());
-    }
-  }
-
-  function updateCanvasSize() {
-    updateQuality();
-    if (!ctx) return;
-
-    state.width = window.innerWidth;
-    state.height = window.innerHeight;
-    state.dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-    canvas.width = Math.round(state.width * state.dpr);
-    canvas.height = Math.round(state.height * state.dpr);
-    canvas.style.width = state.width + "px";
-    canvas.style.height = state.height + "px";
-
-    ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
-
-    buildGrid();
-    buildParticles();
-
-    if (state.pointer.x === 0 && state.pointer.y === 0) {
-      state.pointer.x = state.width * 0.64;
-      state.pointer.y = state.height * 0.32;
-      state.pointer.targetX = state.pointer.x;
-      state.pointer.targetY = state.pointer.y;
-    } else {
-      state.pointer.x = clamp(state.pointer.x, 0, state.width);
-      state.pointer.y = clamp(state.pointer.y, 0, state.height);
-      state.pointer.targetX = clamp(state.pointer.targetX, 0, state.width);
-      state.pointer.targetY = clamp(state.pointer.targetY, 0, state.height);
-    }
-  }
-
-  function getScrollProgress() {
-    const documentHeight = Math.max(
-      document.documentElement.scrollHeight,
-      document.body.scrollHeight
+  function syncModalState() {
+    const isOpen = Boolean(
+      (consultationModal && !consultationModal.hidden) ||
+      (portfolioPreviewModal && !portfolioPreviewModal.hidden)
     );
-    const maxScroll = Math.max(documentHeight - window.innerHeight, 1);
-
-    return clamp(window.scrollY / maxScroll, 0, 1);
+    document.body.classList.toggle("is-modal-open", isOpen);
+    const pageShell = $(".page-shell");
+    if (pageShell) pageShell.inert = isOpen;
+    const mobileCta = $("[data-mobile-cta]");
+    if (mobileCta) mobileCta.inert = isOpen;
   }
 
-  function getIdleTarget(time) {
-    if (state.mobileAmbientMode) {
-      const scrollProgress = getScrollProgress();
-
-      return {
-        x:
-          state.width * 0.5 +
-          Math.sin(time * 0.00022) * state.width * 0.16,
-        y:
-          state.height * (0.26 + scrollProgress * 0.2) +
-          Math.cos(time * 0.00019) * state.height * 0.09
-      };
-    }
-
-    return {
-      x: state.width * 0.66 + Math.sin(time * 0.00018) * state.width * (state.coarsePointer ? 0.04 : 0.08),
-      y: state.height * 0.32 + Math.cos(time * 0.00022) * state.height * (state.coarsePointer ? 0.035 : 0.06)
-    };
+  function restoreFocus(element) {
+    if (element && element.isConnected) element.focus({ preventScroll: true });
   }
 
-  function setPointer(x, y, force) {
-    if (state.reducedMotion || (state.coarsePointer && !force)) {
-      return;
-    }
-
-    state.pointer.targetX = x;
-    state.pointer.targetY = y;
-    state.pointer.active = true;
-
-    if (state.mobileAmbientMode) {
-      state.touchFocusUntil = window.performance.now() + 1600;
-    }
-  }
-
-  function clearPointer() {
-    state.pointer.active = false;
-  }
-
-  function addRipple(x, y) {
-    if (state.reducedMotion) {
-      return;
-    }
-
-    if (state.ripples.length >= 3) state.ripples.shift();
-
-    state.ripples.push({
-      x: x,
-      y: y,
-      radius: 12,
-      alpha: 0.18,
-      growth: 2.4
+  function selectInterest(value) {
+    if (!consultationForm) return;
+    const radios = $$('input[name="interest"]', consultationForm);
+    radios.forEach(function (radio) {
+      radio.checked = Boolean(value) && radio.value === value;
     });
   }
 
-  function updatePointer(time) {
-    if (state.reducedMotion) {
-      state.pointer.x = state.width * 0.62;
-      state.pointer.y = state.height * 0.34;
-      state.pointer.targetX = state.pointer.x;
-      state.pointer.targetY = state.pointer.y;
-      return;
-    }
-
-    if (state.mobileAmbientMode && state.pointer.active && time > state.touchFocusUntil) {
-      state.pointer.active = false;
-    }
-
-    if (!state.pointer.active) {
-      const idleTarget = getIdleTarget(time);
-
-      state.pointer.targetX = idleTarget.x;
-      state.pointer.targetY = idleTarget.y;
-    }
-
-    state.pointer.x = lerp(
-      state.pointer.x,
-      state.pointer.targetX,
-      state.mobileAmbientMode ? 0.06 : state.coarsePointer ? 0.04 : 0.09
-    );
-    state.pointer.y = lerp(
-      state.pointer.y,
-      state.pointer.targetY,
-      state.mobileAmbientMode ? 0.06 : state.coarsePointer ? 0.04 : 0.09
-    );
-  }
-
-  function drawAmbientGlow(time) {
-    const scrollProgress = getScrollProgress();
-    const pointerRadius = state.mobileAmbientMode ? 210 : state.coarsePointer ? 170 : 240;
-    const pointerGradient = ctx.createRadialGradient(
-      state.pointer.x,
-      state.pointer.y,
-      0,
-      state.pointer.x,
-      state.pointer.y,
-      pointerRadius
-    );
-
-    pointerGradient.addColorStop(0, state.mobileAmbientMode ? "rgba(223, 248, 255, 0.2)" : "rgba(206, 244, 255, 0.15)");
-    pointerGradient.addColorStop(0.34, state.mobileAmbientMode ? "rgba(157, 213, 255, 0.14)" : "rgba(140, 198, 255, 0.1)");
-    pointerGradient.addColorStop(1, "rgba(11, 16, 32, 0)");
-
-    ctx.fillStyle = pointerGradient;
-    ctx.fillRect(0, 0, state.width, state.height);
-
-    const ambientX = state.width * 0.82 + Math.sin(time * 0.00012) * state.width * 0.03;
-    const ambientY = state.height * 0.2 + Math.cos(time * 0.00015) * state.height * 0.04;
-    const ambientGradient = ctx.createRadialGradient(
-      ambientX,
-      ambientY,
-      0,
-      ambientX,
-      ambientY,
-      state.width * 0.32
-    );
-
-    ambientGradient.addColorStop(0, state.mobileAmbientMode ? "rgba(132, 234, 255, 0.14)" : "rgba(120, 228, 255, 0.11)");
-    ambientGradient.addColorStop(1, "rgba(11, 16, 32, 0)");
-
-    ctx.fillStyle = ambientGradient;
-    ctx.fillRect(0, 0, state.width, state.height);
-
-    if (state.mobileAmbientMode) {
-      const sweepX = state.width * (0.22 + 0.56 * ((Math.sin(time * 0.00016) + 1) / 2));
-      const sweepY = state.height * (0.16 + scrollProgress * 0.46);
-      const sweepGradient = ctx.createRadialGradient(
-        sweepX,
-        sweepY,
-        0,
-        sweepX,
-        sweepY,
-        state.width * 0.22
-      );
-
-      sweepGradient.addColorStop(0, "rgba(173, 229, 255, 0.12)");
-      sweepGradient.addColorStop(0.55, "rgba(95, 168, 255, 0.06)");
-      sweepGradient.addColorStop(1, "rgba(11, 16, 32, 0)");
-
-      ctx.fillStyle = sweepGradient;
-      ctx.fillRect(0, 0, state.width, state.height);
-    }
-  }
-
-  function updateAndDrawRipples() {
-    if (!state.ripples.length) {
-      return;
-    }
-
-    for (let index = state.ripples.length - 1; index >= 0; index -= 1) {
-      const ripple = state.ripples[index];
-
-      ripple.radius += ripple.growth;
-      ripple.alpha *= 0.94;
-
-      ctx.beginPath();
-      ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(196, 236, 255, " + ripple.alpha + ")";
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      if (ripple.alpha < 0.012) {
-        state.ripples.splice(index, 1);
-      }
-    }
-  }
-
-  function updateAndDrawParticles(time) {
-    if (!state.particles.length) {
-      return;
-    }
-
-    const influenceRadius = state.coarsePointer ? 0 : 140;
-
-    for (let index = 0; index < state.particles.length; index += 1) {
-      const particle = state.particles[index];
-      const swayX = Math.cos(time * 0.00024 + particle.phase) * 0.018;
-      const swayY = Math.sin(time * 0.00026 + particle.phase) * 0.018;
-
-      particle.x += particle.vx + swayX;
-      particle.y += particle.vy + swayY;
-
-      if (influenceRadius > 0) {
-        const dx = state.pointer.x - particle.x;
-        const dy = state.pointer.y - particle.y;
-        const distance = Math.hypot(dx, dy);
-
-        if (distance < influenceRadius && distance > 0) {
-          const pull = (1 - distance / influenceRadius) * 0.012;
-
-          particle.x += dx * pull;
-          particle.y += dy * pull;
-        }
-      }
-
-      if (particle.x < -18) {
-        particle.x = state.width + 18;
-      } else if (particle.x > state.width + 18) {
-        particle.x = -18;
-      }
-
-      if (particle.y < -18) {
-        particle.y = state.height + 18;
-      } else if (particle.y > state.height + 18) {
-        particle.y = -18;
-      }
-
-      const dx = particle.x - state.pointer.x;
-      const dy = particle.y - state.pointer.y;
-      const distance = Math.hypot(dx, dy);
-      const influence = influenceRadius
-        ? smoothstep(clamp(1 - distance / influenceRadius, 0, 1))
-        : 0;
-
-      if (influence > 0.2) {
-        ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size + influence * 1.8, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(145, 226, 255, " + (0.05 + influence * 0.12) + ")";
-        ctx.fill();
-      }
-
-      ctx.beginPath();
-      ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(211, 238, 255, " + (particle.alpha + influence * 0.18) + ")";
-      ctx.fill();
-    }
-  }
-
-  function drawGrid(time) {
-    const timeWave = time * 0.0005;
-
-    for (let index = 0; index < state.points.length; index += 1) {
-      const point = state.points[index];
-      const dx = point.x - state.pointer.x;
-      const dy = point.y - state.pointer.y;
-      const distance = Math.hypot(dx, dy);
-      const influence = state.influenceRadius
-        ? smoothstep(clamp(1 - distance / state.influenceRadius, 0, 1))
-        : 0;
-      const safeDistance = distance || 1;
-      const ambient = (state.mobileAmbientMode ? 0.05 : 0.03) + Math.sin(point.phase + timeWave) * (state.mobileAmbientMode ? 0.028 : 0.02);
-      const warp = influence * (state.mobileAmbientMode ? 2.4 : state.coarsePointer ? 1.6 : 3.8);
-      const drawX = point.x - (dx / safeDistance) * warp;
-      const drawY = point.y - (dy / safeDistance) * warp;
-      const radius = state.baseRadius + (state.activeRadius - state.baseRadius) * influence;
-      const alpha = clamp(
-        (state.mobileAmbientMode ? 0.15 : 0.12) + ambient + influence * (state.mobileAmbientMode ? 0.4 : 0.54),
-        0.1,
-        0.88
-      );
-
-      if (influence > 0.28) {
-        ctx.beginPath();
-        ctx.arc(drawX, drawY, radius + influence * 1.4, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(154, 230, 255, " + (state.mobileAmbientMode ? 0.08 + influence * 0.16 : 0.05 + influence * 0.14) + ")";
-        ctx.fill();
-      }
-
-      ctx.beginPath();
-      ctx.arc(drawX, drawY, radius, 0, Math.PI * 2);
-      ctx.fillStyle = state.mobileAmbientMode
-        ? "rgba(221, 236, 255, " + alpha + ")"
-        : "rgba(210, 226, 250, " + alpha + ")";
-      ctx.fill();
-    }
-  }
-
-  function renderScene(time) {
-    ctx.clearRect(0, 0, state.width, state.height);
-    drawAmbientGlow(time);
-    updateAndDrawParticles(time);
-    updateAndDrawRipples();
-    drawGrid(time);
-  }
-
-  function resetParallax() {
-    for (let index = 0; index < parallaxElements.length; index += 1) {
-      parallaxElements[index].style.transform = "";
-    }
-  }
-
-  function applyParallax() {
-    if (!state.parallaxEnabled || window.scrollY > state.height * 0.85) {
-      resetParallax();
-      return;
-    }
-
-    const pointerX = state.width ? state.pointer.x / state.width - 0.5 : 0;
-    const pointerY = state.height ? state.pointer.y / state.height - 0.5 : 0;
-    const scrollFactor = clamp(window.scrollY / Math.max(state.height, 1), 0, 1);
-
-    for (let index = 0; index < parallaxElements.length; index += 1) {
-      const element = parallaxElements[index];
-      const depth = Number(element.dataset.parallaxDepth || 0);
-      const translateX = -pointerX * depth * 1.8;
-      const translateY = -pointerY * depth * 1.5 - scrollFactor * depth * 0.18;
-
-      element.style.transform =
-        "translate3d(" + translateX.toFixed(2) + "px, " + translateY.toFixed(2) + "px, 0)";
-    }
-  }
-
-  function renderFrame(time) {
-    if (!ctx) return;
-    updatePointer(time);
-    renderScene(time);
-    applyParallax();
-  }
-
-  function stopAnimation() {
-    if (state.rafId) {
-      window.cancelAnimationFrame(state.rafId);
-      state.rafId = 0;
-    }
-  }
-
-  function animate(time) {
-    if (document.hidden) {
-      state.rafId = window.requestAnimationFrame(animate);
-      return;
-    }
-
-    if (time - state.lastFrameTime < state.frameInterval) {
-      state.rafId = window.requestAnimationFrame(animate);
-      return;
-    }
-
-    state.lastFrameTime = time;
-    renderFrame(time);
-    state.rafId = window.requestAnimationFrame(animate);
-  }
-
-  function startAnimation() {
-    if (!ctx) return;
-    if (state.reducedMotion) {
-      stopAnimation();
-      renderFrame(window.performance.now());
-      resetParallax();
-      return;
-    }
-
-    if (state.rafId) {
-      return;
-    }
-
-    state.lastFrameTime = 0;
-    state.rafId = window.requestAnimationFrame(animate);
-  }
-
-  function initRevealObserver() {
-    if (state.reducedMotion || !("IntersectionObserver" in window)) {
-      for (let index = 0; index < revealElements.length; index += 1) {
-        revealElements[index].classList.add("is-visible");
-      }
-
-      return;
-    }
-
-    document.documentElement.classList.add("motion-ready");
-
-    const observer = new IntersectionObserver(
-      function (entries) {
-        for (let index = 0; index < entries.length; index += 1) {
-          const entry = entries[index];
-
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-            observer.unobserve(entry.target);
-          }
-        }
-      },
-      {
-        threshold: 0.14,
-        rootMargin: "0px 0px -12% 0px"
-      }
-    );
-
-    for (let index = 0; index < revealElements.length; index += 1) {
-      const element = revealElements[index];
-
-      if (element.closest(".hero")) {
-        window.setTimeout(function () {
-          element.classList.add("is-visible");
-        }, 40);
-      } else {
-        observer.observe(element);
-      }
-    }
-  }
-
-  function initHighlightRotation() {
-    if (!rotatingItems.length) {
-      return;
-    }
-
-    rotatingItems[0].classList.add("is-active");
-
-    if (state.reducedMotion) {
-      return;
-    }
-
-    state.rotationTimerId = window.setInterval(function () {
-      rotatingItems[state.activeHighlightIndex].classList.remove("is-active");
-      state.activeHighlightIndex = (state.activeHighlightIndex + 1) % rotatingItems.length;
-      rotatingItems[state.activeHighlightIndex].classList.add("is-active");
-    }, 3200);
-  }
-
-  function resetHighlightRotation() {
-    if (state.rotationTimerId) {
-      window.clearInterval(state.rotationTimerId);
-      state.rotationTimerId = 0;
-    }
-
-    for (let index = 0; index < rotatingItems.length; index += 1) {
-      rotatingItems[index].classList.remove("is-active");
-    }
-
-    state.activeHighlightIndex = 0;
-    initHighlightRotation();
-  }
-
   function openConsultationModal(event) {
-    if (!consultationModal) {
-      return;
-    }
+    if (!consultationModal) return;
 
     const source = event && event.currentTarget;
     consultationReturnFocus = document.activeElement;
+
     if (portfolioPreviewModal && !portfolioPreviewModal.hidden) {
       consultationReturnFocus = portfolioReturnFocus;
-      closePortfolioPreviewModal();
+      closePortfolioPreviewModal({ restore: false });
     }
+
+    const topic = source && source.dataset ? String(source.dataset.consultationTopic || "") : "";
+    const interest = source && source.dataset ? String(source.dataset.interest || "") : "";
+    activeConsultationTopic = topic;
+
+    const label = $(".consultation-head .eyebrow", consultationModal);
+    if (label) label.textContent = topic || defaultConsultationEyebrow;
+    if (interest) selectInterest(interest);
 
     consultationModal.hidden = false;
     syncModalState();
-
-    const topic = source && source.dataset ? source.dataset.consultationTopic : "";
-    const label = consultationModal.querySelector(".consultation-head .eyebrow");
-    if (label) label.textContent = topic || "Book a Consultation";
-
     setConsultationStatus(defaultConsultationStatus, "");
     setConsultationSubmitting(false);
 
@@ -925,137 +382,67 @@
   }
 
   function closeConsultationModal() {
-    if (!consultationModal) {
-      return;
-    }
-
+    if (!consultationModal || consultationModal.hidden) return;
     consultationModal.hidden = true;
-
     syncModalState();
     restoreFocus(consultationReturnFocus);
   }
 
-  function openPortfolioPreviewModal(source) {
-    if (!portfolioPreviewModal) {
-      return;
-    }
-
-    const trigger = source && source.currentTarget ? source.currentTarget : source;
-
-    if (!trigger || !trigger.dataset) {
-      return;
-    }
+  function openPortfolioPreviewModal(trigger) {
+    if (!portfolioPreviewModal || !trigger || !trigger.dataset) return;
 
     const previewUrl = String(trigger.dataset.previewUrl || "").trim();
-    const previewTitle = String(trigger.dataset.previewTitle || "Portfolio Project").trim();
-    const previewDomain = String(trigger.dataset.previewDomain || "Website Preview").trim();
-    const previewMode = String(trigger.dataset.previewMode || "").trim().toLowerCase();
+    const previewTitle = String(trigger.dataset.previewTitle || "Project").trim();
+    const previewDomain = String(trigger.dataset.previewDomain || "Website preview").trim();
     const previewImageUrl = String(trigger.dataset.previewImage || "").trim();
 
-    if (!/^https?:\/\//.test(previewUrl)) {
-      return;
-    }
+    if (!/^https?:\/\//.test(previewUrl) || !previewImageUrl) return;
+
+    const imageUrl = new URL(previewImageUrl, document.baseURI);
+    if (!/^https?:$/.test(imageUrl.protocol)) return;
 
     portfolioReturnFocus = trigger;
-
-    if (portfolioPreviewTitle) {
-      portfolioPreviewTitle.textContent = previewTitle;
-    }
-
-    if (portfolioPreviewDomain) {
-      portfolioPreviewDomain.textContent = previewDomain;
-    }
-
-    if (portfolioPreviewLiveLink) {
-      portfolioPreviewLiveLink.href = previewUrl;
-    }
-
-    const imageUrl = previewImageUrl ? new URL(previewImageUrl, document.baseURI) : null;
-    if (previewMode === "image" && imageUrl && /^https?:$/.test(imageUrl.protocol)) {
-      if (portfolioPreviewFrame) {
-        portfolioPreviewFrame.hidden = true;
-        portfolioPreviewFrame.removeAttribute("src");
-      }
-
-      if (portfolioPreviewImage) {
-        portfolioPreviewImage.src = imageUrl.href;
-        portfolioPreviewImage.alt = previewTitle + " preview image";
-        portfolioPreviewImage.hidden = false;
-      }
-
-      if (portfolioPreviewNote) {
-        portfolioPreviewNote.hidden = false;
-      }
-    } else {
-      if (portfolioPreviewImage) {
-        portfolioPreviewImage.hidden = true;
-        portfolioPreviewImage.removeAttribute("src");
-        portfolioPreviewImage.alt = "";
-      }
-
-      if (portfolioPreviewNote) {
-        portfolioPreviewNote.hidden = true;
-      }
-
-      if (portfolioPreviewFrame) {
-        portfolioPreviewFrame.hidden = false;
-        portfolioPreviewFrame.src = previewUrl;
-      }
+    if (portfolioPreviewTitle) portfolioPreviewTitle.textContent = previewTitle;
+    if (portfolioPreviewDomain) portfolioPreviewDomain.textContent = previewDomain;
+    if (portfolioPreviewLiveLink) portfolioPreviewLiveLink.href = previewUrl;
+    if (portfolioPreviewImage) {
+      portfolioPreviewImage.src = imageUrl.href;
+      portfolioPreviewImage.alt = previewTitle + " full page preview";
+      portfolioPreviewImage.hidden = false;
     }
 
     portfolioPreviewModal.hidden = false;
     syncModalState();
-    if (portfolioPreviewTitle) portfolioPreviewTitle.focus({ preventScroll: true });
-    const frameWrap = portfolioPreviewModal.querySelector(".portfolio-preview-frame-wrap");
+    const frameWrap = $(".portfolio-preview-frame-wrap", portfolioPreviewModal);
     if (frameWrap) frameWrap.scrollTop = 0;
+    if (portfolioPreviewTitle) portfolioPreviewTitle.focus({ preventScroll: true });
   }
 
-  function closePortfolioPreviewModal() {
-    if (!portfolioPreviewModal) {
-      return;
-    }
-
+  function closePortfolioPreviewModal(options) {
+    if (!portfolioPreviewModal || portfolioPreviewModal.hidden) return;
     portfolioPreviewModal.hidden = true;
-
-    if (portfolioPreviewFrame) {
-      portfolioPreviewFrame.hidden = false;
-      portfolioPreviewFrame.removeAttribute("src");
-    }
-
     if (portfolioPreviewImage) {
       portfolioPreviewImage.hidden = true;
       portfolioPreviewImage.removeAttribute("src");
       portfolioPreviewImage.alt = "";
     }
-
-    if (portfolioPreviewNote) {
-      portfolioPreviewNote.hidden = true;
-    }
-
     syncModalState();
-    restoreFocus(portfolioReturnFocus);
+    if (!options || options.restore !== false) restoreFocus(portfolioReturnFocus);
   }
 
   async function handleConsultationSubmit(event) {
     event.preventDefault();
-
-    if (!consultationForm) {
-      return;
-    }
+    if (!consultationForm) return;
 
     try {
       setConsultationSubmitting(true);
-      setConsultationStatus("Uploading your details and preparing attachments...", "pending");
+      setConsultationStatus("Sending your details...", "pending");
 
       const payload = await buildConsultationPayload();
-      const response = await submitConsultationPayload(payload);
+      await submitConsultationPayload(payload);
 
       consultationForm.reset();
-      setConsultationStatus(
-        (response && response.message) ||
-          "Consultation request sent. We received your details and attachments.",
-        "success"
-      );
+      setConsultationStatus("Thank you! Your request was sent. We'll be in touch soon.", "success");
       trackAdsLeadFormConversion();
     } catch (error) {
       setConsultationStatus(
@@ -1067,336 +454,339 @@
     }
   }
 
-  function handleResize() {
-    const nextWidth = window.innerWidth;
-    const nextHeight = window.innerHeight;
-
-    if (
-      state.coarsePointer &&
-      Math.abs(nextWidth - state.width) < 4 &&
-      Math.abs(nextHeight - state.height) < 120
-    ) {
-      return;
-    }
-
-    updateCanvasSize();
-
-    if (state.reducedMotion) {
-      renderFrame(window.performance.now());
-      resetParallax();
-      return;
-    }
-
-    startAnimation();
-  }
-
-  function handlePointerMove(event) {
-    setPointer(event.clientX, event.clientY);
-  }
-
-  function handlePointerDown(event) {
-    const forceFocus = state.mobileAmbientMode || event.pointerType === "touch";
-
-    setPointer(event.clientX, event.clientY, forceFocus);
-
-    if (!document.body.classList.contains("is-modal-open")) addRipple(event.clientX, event.clientY);
-  }
-
-  function updateMobileNavBalance() {
-    if (!siteNavs.length) {
-      return;
-    }
-
-    for (let index = 0; index < siteNavs.length; index += 1) {
-      const nav = siteNavs[index];
-
-      if (window.innerWidth > 860) {
-        nav.classList.remove("is-overflowing");
-        nav.scrollLeft = 0;
-        continue;
-      }
-
-      if (nav.scrollWidth > nav.clientWidth + 2) {
-        nav.classList.add("is-overflowing");
-      } else {
-        nav.classList.remove("is-overflowing");
-      }
-    }
-  }
-
-  function getSectionSpotlight(sectionId) {
-    const targetSection = document.getElementById(sectionId);
-
-    if (!targetSection) {
-      return null;
-    }
-
-    return targetSection.querySelector("[data-section-spotlight]");
-  }
-
-  function triggerSectionSpotlight(sectionId) {
-    const spotlight = getSectionSpotlight(sectionId);
-
-    if (!spotlight || state.reducedMotion) {
-      return;
-    }
-
-    const existingTimer = spotlightTimers.get(spotlight);
-
-    if (existingTimer) {
-      window.clearTimeout(existingTimer);
-    }
-
-    spotlight.classList.remove("is-guided");
-    void spotlight.offsetWidth;
-    spotlight.classList.add("is-guided");
-
-    spotlightTimers.set(
-      spotlight,
-      window.setTimeout(function () {
-        spotlight.classList.remove("is-guided");
-      }, 1700)
-    );
-  }
-
-  function triggerGuidedCard(card) {
-    if (!card || state.reducedMotion) {
-      return;
-    }
-
-    const existingTimer = guidedCardTimers.get(card);
-
-    if (existingTimer) {
-      window.clearTimeout(existingTimer);
-    }
-
-    card.classList.remove("is-guided-target");
-    void card.offsetWidth;
-    card.classList.add("is-guided-target");
-
-    guidedCardTimers.set(
-      card,
-      window.setTimeout(function () {
-        card.classList.remove("is-guided-target");
-      }, 1300)
-    );
-  }
-
-  function scheduleSectionSpotlight(hash) {
-    const sectionId = String(hash || "").replace(/^#/, "");
-    let attempts = 0;
-
-    function activateWhenReady() {
-      const targetSection = document.getElementById(sectionId);
-      const parentSection = targetSection ? targetSection.closest(".section") : null;
-
-      if (!targetSection) {
-        return;
-      }
-
-      const rect = targetSection.getBoundingClientRect();
-      const isInView =
-        rect.top <= window.innerHeight * 0.56 &&
-        rect.bottom >= window.innerHeight * 0.24;
-
-      if (isInView || attempts >= 6) {
-        if (guidedSectionIds[sectionId]) {
-          triggerSectionSpotlight(sectionId);
-        }
-
-        if (
-          parentSection &&
-          parentSection.id &&
-          parentSection.id !== sectionId &&
-          guidedSectionIds[parentSection.id]
-        ) {
-          triggerSectionSpotlight(parentSection.id);
-        }
-
-        if (targetSection.matches("[data-guided-card]")) {
-          triggerGuidedCard(targetSection);
-        }
-
-        return;
-      }
-
-      attempts += 1;
-      window.setTimeout(activateWhenReady, 140);
-    }
-
-    window.setTimeout(activateWhenReady, 180);
-  }
-
-  function handleInPageAnchorClick(event) {
-    const href = event.currentTarget.getAttribute("href");
-
-    if (!href || href.charAt(0) !== "#") {
-      return;
-    }
-
-    scheduleSectionSpotlight(href);
-  }
-
-  function handleHashChange() {
-    scheduleSectionSpotlight(window.location.hash);
-  }
-
-  function handleMotionPreferenceChange() {
-    updateCanvasSize();
-    resetHighlightRotation();
-
-    if (state.reducedMotion) {
-      for (let index = 0; index < revealElements.length; index += 1) {
-        revealElements[index].classList.add("is-visible");
-      }
-    }
-
-    startAnimation();
-  }
-
-  function handleVisibilityChange() {
-    if (document.hidden) {
-      stopAnimation();
-      return;
-    }
-
-    startAnimation();
-  }
-
   function handleKeyDown(event) {
     const activeModal = consultationModal && !consultationModal.hidden
       ? consultationModal
       : portfolioPreviewModal && !portfolioPreviewModal.hidden ? portfolioPreviewModal : null;
 
-    if (event.key === "Tab" && activeModal) {
-      const controls = Array.from(activeModal.querySelectorAll(
-        'a[href], button:not(:disabled), input:not(:disabled), textarea:not(:disabled), iframe, [tabindex="0"]'
-      )).filter(function (element) { return element.getClientRects().length > 0; });
-      const first = controls[0];
-      const last = controls[controls.length - 1];
-      if (!first) return;
-      if (event.shiftKey && (document.activeElement === first || !controls.includes(document.activeElement))) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && (document.activeElement === last || !controls.includes(document.activeElement))) {
-        event.preventDefault();
-        first.focus();
+    if (!activeModal) return;
+
+    if (event.key === "Escape") {
+      if (activeModal === portfolioPreviewModal) closePortfolioPreviewModal();
+      else closeConsultationModal();
+      return;
+    }
+
+    if (event.key !== "Tab") return;
+
+    const controls = $$(
+      'a[href], button:not(:disabled), input:not(:disabled), textarea:not(:disabled), [tabindex="0"]',
+      activeModal
+    ).filter(function (element) { return element.getClientRects().length > 0; });
+    const first = controls[0];
+    const last = controls[controls.length - 1];
+    if (!first) return;
+
+    if (event.shiftKey && (document.activeElement === first || !controls.includes(document.activeElement))) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && (document.activeElement === last || !controls.includes(document.activeElement))) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  /* ---------------------------------------------------------------
+   * Hero showcase: rotates through real projects
+   * ------------------------------------------------------------- */
+
+  function initShowcase() {
+    const showcase = $("[data-showcase]");
+    if (!showcase) return;
+
+    const tabs = $$("[data-showcase-tab]", showcase);
+    const desktops = $$("[data-showcase-desktop]", showcase);
+    const mobiles = $$("[data-showcase-mobile]", showcase);
+    const title = $("[data-showcase-title]", showcase);
+    const type = $("[data-showcase-type]", showcase);
+    const url = $("[data-showcase-url]", showcase);
+    const opener = $("[data-showcase-open]", showcase);
+    const rotateMs = 5200;
+    let index = 0;
+    let timer = 0;
+    let paused = false;
+
+    showcase.style.setProperty("--rotate-ms", rotateMs + "ms");
+
+    function show(nextIndex, fromUser) {
+      index = (nextIndex + tabs.length) % tabs.length;
+      tabs.forEach(function (tab, i) {
+        const active = i === index;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        // restart progress animation
+        const bar = $(".progress", tab);
+        if (bar && active) { bar.style.animation = "none"; void bar.offsetWidth; bar.style.animation = ""; }
+      });
+      desktops.forEach(function (img, i) { img.classList.toggle("is-active", i === index); });
+      mobiles.forEach(function (img, i) { img.classList.toggle("is-active", i === index); });
+
+      const tab = tabs[index];
+      if (title) title.textContent = tab.dataset.title;
+      if (type) type.textContent = tab.dataset.type;
+      if (url) url.textContent = tab.dataset.url;
+      if (opener) opener.setAttribute("aria-label", "Preview the " + tab.dataset.title + " website");
+      if (fromUser) restart();
+    }
+
+    function stop() {
+      window.clearTimeout(timer);
+      timer = 0;
+    }
+
+    function restart() {
+      stop();
+      if (prefersReducedMotion() || paused) {
+        showcase.classList.remove("is-rotating");
+        return;
       }
+      showcase.classList.add("is-rotating");
+      timer = window.setTimeout(function () { show(index + 1); restart(); }, rotateMs);
+    }
+
+    tabs.forEach(function (tab, i) {
+      tab.addEventListener("click", function () { show(i, true); });
+      tab.addEventListener("keydown", function (event) {
+        if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+          event.preventDefault();
+          show(index + (event.key === "ArrowRight" ? 1 : -1), true);
+          tabs[index].focus();
+        }
+      });
+    });
+
+    if (opener) {
+      opener.addEventListener("click", function () {
+        const tab = tabs[index];
+        openPortfolioPreviewModal({
+          dataset: {
+            previewUrl: tab.dataset.live,
+            previewTitle: tab.dataset.title,
+            previewDomain: tab.dataset.url,
+            previewImage: tab.dataset.full
+          }
+        });
+        portfolioReturnFocus = opener;
+      });
+    }
+
+    function setPaused(value) {
+      paused = value;
+      showcase.classList.toggle("is-paused", value);
+      if (value) stop(); else restart();
+    }
+
+    showcase.addEventListener("mouseenter", function () { setPaused(true); });
+    showcase.addEventListener("mouseleave", function () { setPaused(false); });
+    showcase.addEventListener("focusin", function () { setPaused(true); });
+    showcase.addEventListener("focusout", function (event) {
+      if (!showcase.contains(event.relatedTarget)) setPaused(false);
+    });
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) stop(); else restart();
+    });
+
+    // Only rotate while the showcase is on screen.
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) restart(); else stop();
+        });
+      }, { threshold: 0.2 }).observe(showcase);
+    } else {
+      restart();
+    }
+  }
+
+  /* ---------------------------------------------------------------
+   * "What do you need?" picker (ARIA tabs)
+   * ------------------------------------------------------------- */
+
+  function initPicker() {
+    $$("[data-picker]").forEach(function (picker) {
+      const tabs = $$("[data-picker-tab]", picker);
+      const panels = $$("[data-picker-panel]", picker);
+
+      function select(nextTab, moveFocus) {
+        tabs.forEach(function (tab) {
+          const active = tab === nextTab;
+          tab.setAttribute("aria-selected", String(active));
+          tab.tabIndex = active ? 0 : -1;
+        });
+        panels.forEach(function (panel) {
+          const active = panel.id === nextTab.getAttribute("aria-controls");
+          panel.hidden = !active;
+          if (active && !prefersReducedMotion()) {
+            panel.classList.remove("is-swapping");
+            void panel.offsetWidth;
+            panel.classList.add("is-swapping");
+          }
+        });
+        if (moveFocus) nextTab.focus();
+
+        // On narrow screens, bring the answer into view.
+        if (window.innerWidth < 1080) {
+          const panel = document.getElementById(nextTab.getAttribute("aria-controls"));
+          if (panel) {
+            const rect = panel.getBoundingClientRect();
+            if (rect.top > window.innerHeight * 0.75 || rect.top < 0) {
+              panel.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+            }
+          }
+        }
+      }
+
+      tabs.forEach(function (tab, i) {
+        tab.addEventListener("click", function () { select(tab, false); });
+        tab.addEventListener("keydown", function (event) {
+          let next = null;
+          if (event.key === "ArrowDown" || event.key === "ArrowRight") next = tabs[(i + 1) % tabs.length];
+          if (event.key === "ArrowUp" || event.key === "ArrowLeft") next = tabs[(i - 1 + tabs.length) % tabs.length];
+          if (event.key === "Home") next = tabs[0];
+          if (event.key === "End") next = tabs[tabs.length - 1];
+          if (next) {
+            event.preventDefault();
+            select(next, true);
+          }
+        });
+      });
+    });
+  }
+
+  /* ---------------------------------------------------------------
+   * Portfolio cards: hover-scroll distance + filters
+   * ------------------------------------------------------------- */
+
+  function updateScrollDistances() {
+    $$(".work-window").forEach(function (frame) {
+      const img = $("img", frame);
+      if (!img) return;
+      const apply = function () {
+        const visible = frame.clientHeight - 22;
+        const rendered = img.getBoundingClientRect().height;
+        const distance = Math.max(0, rendered - visible);
+        frame.parentElement.style.setProperty("--scroll-distance", "-" + Math.round(distance) + "px");
+        img.style.transitionDuration = Math.min(9, Math.max(1.5, distance / 450)) + "s";
+      };
+      if (img.complete) apply(); else img.addEventListener("load", apply, { once: true });
+    });
+  }
+
+  function initFilters() {
+    const chips = $$("[data-filter]");
+    if (!chips.length) return;
+    const cards = $$("[data-category]");
+    const status = $("[data-filter-status]");
+
+    chips.forEach(function (chip) {
+      chip.addEventListener("click", function () {
+        const filter = chip.dataset.filter;
+        chips.forEach(function (c) { c.setAttribute("aria-pressed", String(c === chip)); });
+        let shown = 0;
+        cards.forEach(function (card) {
+          const match = filter === "all" || card.dataset.category === filter;
+          card.hidden = !match;
+          if (match) {
+            shown += 1;
+            if (!prefersReducedMotion()) {
+              card.classList.remove("is-entering");
+              void card.offsetWidth;
+              card.classList.add("is-entering");
+            }
+          }
+        });
+        if (status) {
+          status.textContent = filter === "all"
+            ? "Showing all " + shown + " projects."
+            : "Showing " + shown + " project" + (shown === 1 ? "" : "s") + " in " + chip.firstChild.textContent.trim() + ".";
+        }
+        updateScrollDistances();
+      });
+    });
+  }
+
+  /* ---------------------------------------------------------------
+   * Page chrome: reveal on scroll, header shadow, mobile CTA
+   * ------------------------------------------------------------- */
+
+  function initReveal() {
+    const elements = $$("[data-reveal]");
+    if (prefersReducedMotion() || !("IntersectionObserver" in window)) {
+      elements.forEach(function (el) { el.classList.add("is-visible"); });
       return;
     }
-
-    if (event.key !== "Escape") {
-      return;
-    }
-
-    if (portfolioPreviewModal && !portfolioPreviewModal.hidden) {
-      closePortfolioPreviewModal();
-      return;
-    }
-
-    if (consultationModal && !consultationModal.hidden) {
-      closeConsultationModal();
-    }
+    document.documentElement.classList.add("motion-ready");
+    const observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+    elements.forEach(function (el) {
+      if (el.closest(".hero, .page-intro")) {
+        window.setTimeout(function () { el.classList.add("is-visible"); }, 40);
+      } else {
+        observer.observe(el);
+      }
+    });
   }
 
-  function addMediaChangeListener(query, handler) {
-    if (typeof query.addEventListener === "function") {
-      query.addEventListener("change", handler);
-    } else if (typeof query.addListener === "function") {
-      query.addListener(handler);
+  function initScrollChrome() {
+    const header = $("[data-header]");
+    const mobileCta = $("[data-mobile-cta]");
+    const footer = $(".site-footer");
+    let ticking = false;
+
+    function update() {
+      ticking = false;
+      const y = window.scrollY;
+      if (header) header.classList.toggle("is-scrolled", y > 12);
+      if (mobileCta) {
+        const nearFooter = footer ? footer.getBoundingClientRect().top < window.innerHeight - 40 : false;
+        mobileCta.classList.toggle("is-visible", y > window.innerHeight * 0.6 && !nearFooter);
+      }
     }
+
+    window.addEventListener("scroll", function () {
+      if (!ticking) { ticking = true; window.requestAnimationFrame(update); }
+    }, { passive: true });
+    update();
   }
 
-  updateCanvasSize();
-  updateMobileNavBalance();
-  initRevealObserver();
-  initHighlightRotation();
-  startAnimation();
+  /* ---------------------------------------------------------------
+   * Wire up
+   * ------------------------------------------------------------- */
 
-  window.setTimeout(updateMobileNavBalance, 180);
-
-  if (document.fonts && typeof document.fonts.ready === "object") {
-    document.fonts.ready.then(updateMobileNavBalance).catch(function () {});
-  }
-
-  for (let index = 0; index < openConsultationButtons.length; index += 1) {
-    openConsultationButtons[index].addEventListener("click", openConsultationModal);
-  }
-
-  for (let index = 0; index < openPortfolioPreviewButtons.length; index += 1) {
-    openPortfolioPreviewButtons[index].addEventListener("click", function (event) {
+  $$("[data-open-consultation]").forEach(function (button) {
+    button.addEventListener("click", openConsultationModal);
+  });
+  $$("[data-close-consultation]").forEach(function (button) {
+    button.addEventListener("click", closeConsultationModal);
+  });
+  $$("[data-open-preview]").forEach(function (button) {
+    button.addEventListener("click", function (event) {
       event.preventDefault();
       openPortfolioPreviewModal(event.currentTarget);
     });
-  }
-
-  document.addEventListener("click", function (event) {
-    if (event.defaultPrevented) {
-      return;
-    }
-
-    const trigger = event.target && event.target.closest
-      ? event.target.closest("[data-open-preview]")
-      : null;
-
-    if (!trigger) {
-      return;
-    }
-
-    event.preventDefault();
-    openPortfolioPreviewModal(trigger);
   });
-
-  document.addEventListener("keydown", function (event) {
-    const trigger = event.target && event.target.closest
-      ? event.target.closest("[data-open-preview]")
-      : null;
-
-    if (!trigger) {
-      return;
-    }
-
-    if (event.key !== "Enter" && event.key !== " ") {
-      return;
-    }
-
-    event.preventDefault();
-    openPortfolioPreviewModal(trigger);
+  $$("[data-close-portfolio-preview]").forEach(function (button) {
+    button.addEventListener("click", function () { closePortfolioPreviewModal(); });
   });
-
-  for (let index = 0; index < inPageAnchors.length; index += 1) {
-    inPageAnchors[index].addEventListener("click", handleInPageAnchorClick);
-  }
-
-  for (let index = 0; index < previewFrames.length; index += 1) {
-    previewFrames[index].addEventListener("load", function () {
-      previewFrames[index].classList.add("is-loaded");
-    });
-  }
-
-  for (let index = 0; index < closeConsultationButtons.length; index += 1) {
-    closeConsultationButtons[index].addEventListener("click", closeConsultationModal);
-  }
-
-  for (let index = 0; index < closePortfolioPreviewButtons.length; index += 1) {
-    closePortfolioPreviewButtons[index].addEventListener("click", closePortfolioPreviewModal);
-  }
-
-  if (consultationForm) {
-    consultationForm.addEventListener("submit", handleConsultationSubmit);
-  }
-
-  window.addEventListener("resize", handleResize);
-  window.addEventListener("resize", updateMobileNavBalance);
-  window.addEventListener("pointermove", handlePointerMove, { passive: true });
-  window.addEventListener("pointerdown", handlePointerDown, { passive: true });
-  window.addEventListener("pointerleave", clearPointer);
-  window.addEventListener("blur", clearPointer);
+  if (consultationForm) consultationForm.addEventListener("submit", handleConsultationSubmit);
   window.addEventListener("keydown", handleKeyDown);
-  window.addEventListener("hashchange", handleHashChange);
-  document.addEventListener("mouseleave", clearPointer);
-  document.addEventListener("visibilitychange", handleVisibilityChange);
-  addMediaChangeListener(reducedMotionQuery, handleMotionPreferenceChange);
-  addMediaChangeListener(coarsePointerQuery, handleMotionPreferenceChange);
-  handleHashChange();
+
+  initShowcase();
+  initPicker();
+  initFilters();
+  initReveal();
+  initScrollChrome();
+  updateScrollDistances();
+
+  let resizeTimer = 0;
+  window.addEventListener("resize", function () {
+    window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(updateScrollDistances, 150);
+  });
 })();
