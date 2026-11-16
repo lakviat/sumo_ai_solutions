@@ -40,23 +40,45 @@ for (const file of pages) {
   });
 }
 
-test('simple service-first homepage with six clickable services', () => {
+test('service-first homepage with six clickable services and an interactive picker', () => {
   const html = read('index.html');
   const body = html.split('<body>')[1];
   assert.equal((body.match(/class="service-card"/g) || []).length, 6);
   for (const match of body.matchAll(/<button class="service-card"[^>]+>/g)) assert.ok(match[0].includes('data-open-consultation'));
-  assert.doesNotMatch(body, /enterprise|system panel|Why SUMO|technical depth/i);
-  assert.ok(body.indexOf('id="services"') < body.indexOf('id="portfolio-preview"'));
+  assert.doesNotMatch(body, /enterprise|corporat/i);
+  assert.ok(body.indexOf('id="needs"') < body.indexOf('id="services"'));
+  assert.ok(body.indexOf('id="services"') < body.indexOf('id="work"'));
+  assert.equal((body.match(/data-picker-tab/g) || []).length, (body.match(/data-picker-panel/g) || []).length);
   assert.doesNotMatch(body, /<iframe/);
 });
 
-test('portfolio is lightweight and distinguishes outside inspiration', () => {
+test('portfolio shows only real projects, with filters and image previews', () => {
   const html = read('portfolio/index.html');
-  assert.equal((html.match(/class="project-card"/g) || []).length, 5);
+  const cards = [...html.matchAll(/<article class="work-card" id="([^"]+)" data-category="([^"]+)"/g)];
+  assert.equal(cards.length, 6);
+  const filters = [...html.matchAll(/data-filter="([^"]+)"/g)].map(m => m[1]).filter(f => f !== 'all');
+  for (const [, , category] of cards) assert.ok(filters.includes(category), 'No filter for ' + category);
+  assert.doesNotMatch(html, /<iframe/);
   assert.doesNotMatch(html, /chicagoappliance|chicago-appliance/);
-  assert.doesNotMatch(html, /<iframe[^>]+src=/);
-  assert.equal((html.match(/data-preview-mode="image"/g) || []).length, 6);
-  assert.ok(html.includes('Not SUMO projects.'));
+  for (const match of html.matchAll(/data-preview-image="([^"]+)"/g)) assert.match(match[1], /^\.\.\/assets\/portfolio\/[a-z-]+-full\.jpg$/);
+});
+
+test('only approved portfolio projects ship with the site', () => {
+  const approved = ['fridge-repair', 'grill-on-wheel', 'imperial-towers', 'chicago-cleaning', 'image-converter', 'json-diff'];
+  const assets = fs.readdirSync(path.join(root, 'assets/portfolio'));
+  for (const name of assets) {
+    assert.ok(approved.includes(name.replace(/(-full|-mobile)?\.jpg$/, '')), 'Unexpected portfolio asset ' + name);
+  }
+  const ids = [...read('portfolio/index.html').matchAll(/<article class="work-card" id="([^"]+)"/g)].map(m => m[1]);
+  assert.deepEqual(ids.sort(), [...approved].sort());
+});
+
+test('consultation form keeps the same payload fields and adds the interest choice', () => {
+  const js = read('script.js');
+  for (const key of ['firstName', 'lastName', 'fullName', 'email', 'phone', 'message', 'projectDescription', 'attachments']) {
+    assert.ok(js.includes(key + ':'), 'payload key ' + key);
+  }
+  for (const file of pages) assert.equal((read(file).match(/name="interest"/g) || []).length, 4);
 });
 
 test('shared assets use one cache version on both pages', () => {

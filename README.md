@@ -2,70 +2,86 @@
 
 ![SUMO AI Solutions: websites, apps, and AI for small businesses](assets/social-preview.png)
 
-**A better website. A smarter business.**
+**Websites and apps that bring you more customers.**
 
 We help small businesses get online, bring app ideas to life, and spend less time on repetitive work. Based in **Miami, Florida**, we work with clients everywhere.
 
-[Visit our website](https://sumoaisolutions.com/) | [Explore the portfolio](https://sumoaisolutions.com/portfolio/)
+[Visit our website](https://sumoaisolutions.com/) | [See our work](https://sumoaisolutions.com/portfolio/)
 
 ## What We Do
 
 | Service | How we help |
 | --- | --- |
-| **Websites & web apps** | Business websites, landing pages, online stores, booking tools, customer portals, and custom web applications. |
+| **Websites & web apps** | Business websites, landing pages, redesigns, online stores, booking and quote tools, and custom web apps. |
 | **Mobile apps** | iPhone and Android apps for customers, teams, and new business ideas. |
-| **AI for your business** | Customer assistants, AI-powered tools, and practical help using AI in everyday work. |
-| **Business automation** | Connect your tools, simplify follow-ups, reduce manual tasks, and save time. |
-| **IT consulting & support** | Clear advice, troubleshooting, software improvements, system integration, and hands-on implementation. |
-| **IT recruiting & talent support** | Find developers and IT specialists, define roles, source candidates, and strengthen your team. |
-
-We can start from scratch or improve what you already have. You don't need a technical brief to start a conversation.
+| **AI for your business** | AI assistants that answer customer questions and practical AI tools for everyday work. |
+| **Business automation** | Connected tools, automatic follow-ups, and less manual work. |
+| **IT consulting & support** | Honest advice, troubleshooting, and hands-on implementation. |
+| **Tech hiring help** | Defining roles and finding developers and IT specialists. |
 
 ## How We Work
 
-1. **Tell us your idea.** A conversation about your business and what you need.
-2. **Get a clear plan.** Agree on the scope, price, and timing before building.
-3. **Bring it to life.** Design, build, review together, and launch.
+1. **Tell us your idea.** A quick message about your business. No technical brief needed.
+2. **Get a clear plan.** Scope, price, and timing agreed before any work starts.
+3. **We build and launch.** You review along the way; we launch when you're happy.
 
-Every service card and consultation button opens the same inquiry form. It accepts a name, email, optional phone number, project description, and optional attachments. Reference links can go directly in the description.
+## The Website
 
-## Portfolio
+The site is built for people arriving from social ads, most of them on phones. It's designed to answer "what do you do, can I trust you, and how do I start?" within a few scrolls.
 
-Our project gallery currently features **TV Mount 360** and **Jobs in Kyrgyzstan**. The separate inspiration gallery credits independent personal website designs; these are **not represented as SUMO projects**.
+**Homepage sections**
 
-Project links were checked on **November 16, 2026**:
+| Section | Purpose |
+| --- | --- |
+| Hero + project showcase | Clear promise, two calls to action, and a rotating browser/phone preview of real projects. |
+| "What does your business need?" | Interactive picker. Visitors choose a goal and see what they get, who it's for, and a matching call to action. |
+| Services | Six clickable cards. Each opens the inquiry form with the topic pre-selected. |
+| Our work | Two featured projects with hover-to-scroll previews and a link to the full portfolio. |
+| Built in, not extra | What every website includes. |
+| How it works | Three-step process. |
+| FAQ | Common questions from first-time website buyers. |
+| Call to action | Final prompt to get in touch. |
 
-| Website | Result | Presentation |
+On phones, a sticky "Get started" bar appears after the first screen.
+
+**Portfolio** (`/portfolio/`) has filter chips (Home services, Restaurants, Real estate, Web apps), hover-to-scroll previews, full-page previews in a dialog, "Visit live site" links, and a "Build something similar" button on every project.
+
+### Portfolio projects
+
+| Project | Type | Live link |
 | --- | --- | --- |
-| TV Mount 360 | HTTP 200; expected site present | Local thumbnail, on-demand live preview |
-| Jobs in Kyrgyzstan | HTTP 200; expected site present | Local thumbnail, on-demand live preview |
-| Indi Harris | HTTP 200; embedding restricted | Credited inspiration, scrollable image preview |
-| Ollivere | HTTP 200; embedding restricted | Credited inspiration, scrollable image preview |
-| Nick Velten | HTTP 200; expected site present | Credited inspiration, scrollable image preview |
-| Chicago Appliance Repair | HTTP 404, GitHub Pages "Site not found" | Removed from the gallery and sitemap |
+| The Fridge Repair | Home services, South Florida | https://www.thefridgerepair.com/ |
+| Grill on Wheel | Restaurant, Hallandale Beach | https://lakviat.github.io/greelonwheel/ |
+| Imperial Towers | Real estate (website concept) | https://lakviat.github.io/imperial_towers/ |
+| Chi Cleaning Co. | Home services, Chicago | https://lakviat.github.io/chicago_cleaning_services-/ |
+| Fast Image Converter | Web app | https://convertjpgs.com/ |
+| JSON Diff | Web app | https://www.jsondiff.info/ |
 
-Preview images are stored locally, rather than loading several external websites when someone opens the page. Every preview includes an **Open Live Site** link. External sites can change or restrict embedding, so check them again before new ad campaigns.
-
-The homepage's illustrated website and mobile screen are explicitly labeled **design concepts**, not client projects.
+Screenshots in `assets/portfolio/` were rendered from each project's own repository: `<id>.jpg` (desktop, 1200×750), `<id>-mobile.jpg` (390×844), and `<id>-full.jpg` (full page, used for hover-scroll and the preview dialog). Some third-party photos (such as stock images loaded from external hosts) don't appear in the renders, so a few full-page screenshots are cropped above those sections. Re-capture screenshots when a project's design changes. Check every live link before launching new ad campaigns.
 
 ## Website Setup
 
-A build-free static website hosted on GitHub Pages. No application server or production package installation is required.
+A build-free static website hosted on GitHub Pages. No application server or package installation is required.
 
 | File | Purpose |
 | --- | --- |
-| `index.html` | Small-business homepage, service cards, portfolio highlights, consultation form |
-| `portfolio/index.html` | Project gallery, independent inspiration, preview dialogs |
-| `style.css` | Shared design, responsive layouts, dialog styles, reduced-motion rules |
-| `script.js` | Dot-grid animation, dialogs, attachment handling, form submission, conversion event |
-| `assets/portfolio/` | Locally stored project thumbnails and full-page inspiration previews |
+| `index.html` | Homepage, inquiry form, project preview dialog |
+| `portfolio/index.html` | Project gallery with filters and previews |
+| `style.css` | Shared design, responsive layouts, dialogs, reduced-motion rules |
+| `script.js` | Project showcase, needs picker, filters, dialogs, scroll reveals, form submission, conversion event |
+| `assets/icons.svg` | Shared icon sprite |
+| `assets/portfolio/` | Project screenshots (desktop, mobile, full page) |
 | `assets/fonts/` | Self-hosted Manrope font and its SIL Open Font License |
 | `assets/social-preview.png` | Social sharing image; editable SVG source sits alongside it |
-| `backend/consultation-handler.gs` | Existing Google Apps Script backend |
+| `backend/consultation-handler.gs` | Google Apps Script backend for the inquiry form |
 | `sitemap.xml`, `robots.txt` | Search-engine discovery |
-| `CNAME` | Existing custom domain |
+| `CNAME` | Custom domain |
 | `googlebb0f81e2e8e23f9a.html` | Google site verification |
 | `tests/site.test.cjs` | Dependency-free structure and integration checks |
+
+### Brand
+
+Colors come from the existing brand palette: navy `#183552`, ink `#173b44`, cream `#f9faf5` / `#f6f4ef`, peach accent `#ffc3a7`, cyan `#a9e3ee`, and the logo mark (`assets/favicon-sumo-mark.svg`). Type is Manrope.
 
 ### Local Preview
 
@@ -84,24 +100,25 @@ node --check script.js
 node --test tests/site.test.cjs
 ```
 
-Also review desktop and mobile layouts, keyboard navigation, reduced-motion mode, all consultation triggers, and every portfolio preview. Test form responses with a mocked endpoint to avoid sending test emails or recording artificial ad conversions.
+Also review desktop and mobile layouts, keyboard navigation (picker and showcase tabs support arrow keys), reduced-motion mode, every consultation trigger, and every portfolio preview. Test the form with a mocked endpoint to avoid sending test emails or recording artificial ad conversions.
+
+### Inquiry Form
+
+Every "Get started", service card, picker answer, and "Build something similar" button opens the same form. Buttons can pre-select an interest (website, mobile app, AI & automation, something else). The payload keeps all previous fields (`firstName`, `lastName`, `fullName`, `email`, `phone`, `message`, `projectDescription`, `attachments`, `source`, `pageUrl`) and adds `interest` and `topic`. The chosen interest and starting point are also written at the top of `message`, so they show up in the existing email without backend changes.
 
 ### Preserved Integrations
 
-- Google Ads base tag: `AW-17948229197`, present on both public pages.
-- Existing lead conversion destination: `AW-17948229197/VZTvCKPwzogcEM38sO5C`.
-- Existing form payload, attachment limits, Google Apps Script endpoint, and submission flow.
-- Existing search keywords, canonical URLs, structured service data, and Google verification file.
-- Existing desktop pointer interaction and lightweight touch-screen ambient motion.
+- Google Ads base tag `AW-17948229197` on both public pages.
+- Lead conversion `AW-17948229197/VZTvCKPwzogcEM38sO5C`, fired after a successful submission.
+- Google Apps Script endpoint, attachment limits, and submission flow.
+- Canonical URLs, structured data, sitemap, and Google verification file.
 
-The redesign does not install a Meta Pixel, add WhatsApp contact information, or change ad-account configuration. Those need the relevant account details and contact number.
+The site does not include a Meta Pixel. If you're running Instagram ads, adding the Meta Pixel (and a `Lead` event alongside the Google conversion) will let Meta optimize for form submissions. That needs the Pixel ID from Meta Events Manager.
 
 ### Deployment
 
-Publish the repository root from `main` using the existing GitHub Pages configuration. Both HTML files use the same versioned CSS and JavaScript URLs; update those versions together when changing shared assets. The sitemap includes only the two published page routes.
-
-Core content renders without waiting for JavaScript. Fonts and preview images are served with the site; third-party websites load only after a visitor requests a live preview. Motion respects reduced-motion preferences and pauses when the tab is hidden.
+Publish the repository root from `main` using the existing GitHub Pages configuration. Both HTML files use the same versioned CSS and JavaScript URLs (`?v=…`); update them together when changing shared assets.
 
 ## Start a Conversation
 
-Use **Book a Consultation** on [sumoaisolutions.com](https://sumoaisolutions.com/). Tell us what you're building, what needs improving, or where you could use a hand.
+Use **Get started** on [sumoaisolutions.com](https://sumoaisolutions.com/). Tell us what you're building, what needs improving, or where you could use a hand.
