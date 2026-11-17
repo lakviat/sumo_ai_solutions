@@ -74,9 +74,12 @@ A build-free static website hosted on GitHub Pages. No application server or pac
 | `assets/social-preview.png` | Social sharing image; editable SVG source sits alongside it |
 | `backend/consultation-handler.gs` | Google Apps Script backend for the inquiry form |
 | `sitemap.xml`, `robots.txt` | Search-engine discovery |
+| `indexnow-key.txt` | Public IndexNow domain-ownership challenge, not a secret |
+| `scripts/submit-indexnow.cjs` | Notify participating search engines after the ownership file is live |
+| `.github/workflows/search-discovery.yml` | Site checks and post-deployment IndexNow notifications |
 | `CNAME` | Custom domain |
 | `googlebb0f81e2e8e23f9a.html` | Google site verification |
-| `tests/site.test.cjs` | Dependency-free structure and integration checks |
+| `tests/*.test.cjs` | Dependency-free structure, integration, and search-discovery checks |
 
 ### Brand
 
@@ -96,7 +99,8 @@ Open [the homepage](http://localhost:9090/) or [the portfolio](http://localhost:
 
 ```sh
 node --check script.js
-node --test tests/site.test.cjs
+node --check scripts/submit-indexnow.cjs
+node --test tests/*.test.cjs
 ```
 
 Also review desktop and mobile layouts, keyboard navigation (project selectors support arrow keys), reduced-motion mode, every consultation trigger, and every portfolio preview. Test the form with a mocked endpoint to avoid sending test emails or recording artificial ad conversions.
@@ -117,6 +121,37 @@ The site does not include a Meta Pixel. If you're running Instagram ads, adding 
 ### Deployment
 
 Publish the repository root from `main` using the existing GitHub Pages configuration. Both HTML files use the same versioned CSS and JavaScript URLs (`?v=…`); update them together when changing shared assets.
+
+### Search and AI Discoverability
+
+The canonical site is **https://sumoaisolutions.com/**. The pages contain their text, metadata, and JSON-LD in the delivered HTML, without requiring JavaScript. `robots.txt` allows all crawlers, including Googlebot, bingbot, OpenAI's OAI-SearchBot, and other AI search crawlers. Keep public pages crawlable and snippets enabled; a crawler permission is not proof of indexing.
+
+Titles, visible descriptions, and linked `Organization`, `WebSite`, `WebPage`, `Service`, and portfolio data describe the same business and content. Do not invent business addresses, reviews, or external `sameAs` profiles. Keyword tags are retained as brief service summaries, not a discovery mechanism: [Google does not use the keywords meta tag for indexing or ranking](https://developers.google.com/search/docs/crawling-indexing/special-tags#unsupported).
+
+**Owner setup is still required.** A verification file, sitemap, or successful HTTP response alone does not confirm that a search engine has indexed the site.
+
+| Platform | Required owner action |
+| --- | --- |
+| [Google Search Console](https://search.google.com/search-console/) | Add or open the exact `https://sumoaisolutions.com/` URL-prefix property, or verify the domain property through DNS. Preserve the existing Google verification HTML file. Submit `https://sumoaisolutions.com/sitemap.xml`, inspect both canonical page URLs, run the live test, and request indexing. Review Page indexing, Google's selected canonical, Manual actions, and Security issues for any reported exclusion. |
+| [Bing Webmaster Tools](https://www.bing.com/webmasters/) | Verify the domain, or import an already verified Search Console property. Submit the same sitemap and inspect both URLs. Bing indexing also supports discovery in Microsoft search experiences; it does not guarantee a Copilot citation. |
+| Business profiles and references | Link the canonical domain from genuine business/social profiles and relevant client credits where agreed. Keep the company name and location consistent. Only create a Google Business Profile or Bing Places listing if the business meets that platform's eligibility rules; do not invent a public office address. |
+| AI search | Keep search crawlers allowed and useful business information visible. [Google AI Overviews and AI Mode use ordinary SEO requirements](https://developers.google.com/search/docs/appearance/ai-features), not a special AI text file or special schema. [OAI-SearchBot controls OpenAI search crawling](https://developers.openai.com/api/docs/bots); GPTBot training permissions are a separate setting. |
+
+Use Search Console's Performance report to monitor impressions and clicks for the brand query `sumo ai solutions`. A public search result or `site:` query is not a complete indexing report. Recrawling can take days or longer, and neither rankings nor inclusion in any search engine or AI answer can be guaranteed.
+
+**IndexNow notifications**
+
+The `Search discovery` workflow checks pull requests and pushes to `main`. After a successful GitHub Pages `page_build` event in `lakviat/sumo_ai_solutions`, it checks the deployed ownership file and submits the sitemap's canonical URLs to [IndexNow](https://www.indexnow.org/documentation). Notifications are disabled for forks and pull requests. GitHub Actions must be enabled in the upstream repository.
+
+`indexnow-key.txt` is a deliberately public ownership challenge, not an account credential. Keep it deployed at the root and do not rotate it on every run. Notifications help Bing and other participating engines discover updates; they do not submit URLs to Google or guarantee indexing. HTTP 202 means ownership verification is still pending, not that indexing succeeded. Missing or mismatched deployed keys and API failures fail the workflow visibly.
+
+After deployment, the workflow can also be run manually from GitHub Actions. To send a notification locally with Node.js 24 or newer:
+
+```sh
+node scripts/submit-indexnow.cjs
+```
+
+When public content changes, update the corresponding sitemap `lastmod` to the actual modification date, never a future date or an automatically refreshed daily timestamp. Add new canonical pages to the sitemap and link them from existing pages.
 
 ## Start a Conversation
 
