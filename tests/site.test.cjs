@@ -5,6 +5,9 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const pages = ['index.html', 'portfolio/index.html'];
+const origin = 'https://' + read('CNAME').trim();
+const meta = (html, name) => html.match(new RegExp('<meta\\s+(?:name|property)="' + name + '"\\s+content="([^"]*)"'))?.[1].replace(/&amp;/g, '&');
+const graph = file => JSON.parse(read(file).match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])['@graph'];
 const endpoint = 'https://script.google.com/macros/s/AKfycbzSDoKrP5WWN14kzDUCTtE5N9jBej-nVHb2ZEJLPkccyhfFOqykzQCnPzPtrISZbTLETw/exec';
 
 for (const file of pages) {
@@ -19,6 +22,42 @@ for (const file of pages) {
     assert.equal((html.match(/<h1\b/g) || []).length, 1);
     assert.match(html, /name="keywords"/);
     assert.doesNotMatch(html, /gtag\('event'/);
+  });
+
+  test(file + ': consistent canonical, search, sharing, and page identity', () => {
+    const canonical = origin + (file === 'index.html' ? '/' : '/portfolio/');
+    const title = html.match(/<title>([^<]+)<\/title>/)[1].replace(/&amp;/g, '&');
+    const description = meta(html, 'description');
+    assert.ok(title.includes('SUMO AI Solutions'));
+    assert.ok(description.includes('SUMO AI Solutions'));
+    assert.equal((html.match(/<link rel="canonical"/g) || []).length, 1);
+    assert.ok(html.includes('<link rel="canonical" href="' + canonical + '">'));
+    assert.equal(meta(html, 'og:url'), canonical);
+    assert.equal(meta(html, 'og:site_name'), 'SUMO AI Solutions');
+    for (const prefix of ['og', 'twitter']) {
+      assert.equal(meta(html, prefix + ':title'), title);
+      assert.equal(meta(html, prefix + ':description'), description);
+      assert.ok(meta(html, prefix + ':image:alt').includes('SUMO AI Solutions'));
+    }
+    assert.equal(meta(html, 'twitter:card'), 'summary_large_image');
+    assert.equal(meta(html, 'twitter:image'), meta(html, 'og:image'));
+    const image = new URL(meta(html, 'og:image'));
+    assert.equal(image.origin, origin);
+    const png = fs.readFileSync(path.join(root, image.pathname.slice(1)));
+    assert.equal(png.toString('hex', 0, 8), '89504e470d0a1a0a');
+    assert.equal(Number(meta(html, 'og:image:width')), png.readUInt32BE(16));
+    assert.equal(Number(meta(html, 'og:image:height')), png.readUInt32BE(20));
+    assert.match(meta(html, 'robots'), /\bindex\b/);
+    for (const agent of ['robots', 'googlebot', 'bingbot']) {
+      assert.doesNotMatch(meta(html, agent) || '', /\b(noindex|nofollow|none|nosnippet)\b/i);
+    }
+    const page = graph(file).find(node => node['@id'] === canonical + '#page');
+    assert.equal(page.url, canonical);
+    assert.equal(page.name, title);
+    assert.equal(page.description, description);
+    assert.equal(page.inLanguage, 'en');
+    assert.equal(page.isPartOf['@id'], origin + '/#website');
+    assert.equal(page.about['@id'], origin + '/#organization');
   });
 
   test(file + ': valid structured data, unique IDs, and working local references', () => {
@@ -39,6 +78,69 @@ for (const file of pages) {
     }
   });
 }
+
+test('homepage connects the brand, website, page, and visible service offerings', () => {
+  const nodes = graph('index.html');
+  const organization = nodes.find(node => node['@id'] === origin + '/#organization');
+  const website = nodes.find(node => node['@id'] === origin + '/#website');
+  const page = nodes.find(node => node['@id'] === origin + '/#page');
+  const services = nodes.find(node => node['@id'] === origin + '/#service');
+  assert.equal(organization['@type'], 'Organization');
+  assert.equal(organization.name, 'SUMO AI Solutions');
+  assert.equal(organization.url, origin + '/');
+  assert.equal(organization.location.name, 'Miami, Florida');
+  assert.ok(!organization.sameAs?.includes(organization.url));
+  assert.equal(website['@type'], 'WebSite');
+  assert.equal(website.name, organization.name);
+  assert.equal(website.url, organization.url);
+  assert.equal(website.publisher['@id'], organization['@id']);
+  assert.equal(page['@type'], 'WebPage');
+  assert.equal(page.mainEntity['@id'], services['@id']);
+  assert.equal(services['@type'], 'Service');
+  assert.equal(services.provider['@id'], organization['@id']);
+  const cards = [...read('index.html').matchAll(/<button class="service-card" id="([^"]+)"[^>]*>([\s\S]*?)<\/button>/g)];
+  const offers = services.hasOfferCatalog.itemListElement;
+  assert.equal(offers.length, cards.length);
+  for (const [index, offer] of offers.entries()) {
+    const service = offer.itemOffered;
+    assert.equal(offer['@type'], 'Offer');
+    assert.equal(service['@type'], 'Service');
+    assert.equal(service['@id'], origin + '/#' + cards[index][1]);
+    assert.equal(service.url, service['@id']);
+    assert.equal(service.provider['@id'], organization['@id']);
+    assert.equal(service.description, cards[index][2].match(/class="service-description">([^<]+)<\/span>/)[1]);
+  }
+  const hero = read('index.html').match(/<div class="hero-copy"[\s\S]*?<\/div>/)[0];
+  assert.match(hero, /SUMO AI Solutions builds websites, mobile apps, and practical AI tools for small businesses/);
+});
+
+test('portfolio structured data matches the visible projects and breadcrumbs', () => {
+  const nodes = graph('portfolio/index.html');
+  const page = nodes.find(node => node['@type'] === 'CollectionPage');
+  const breadcrumbs = nodes.find(node => node['@type'] === 'BreadcrumbList');
+  const cards = [...read('portfolio/index.html').matchAll(/<article class="work-card" id="([^"]+)"[^>]*>([\s\S]*?)<\/article>/g)];
+  assert.equal(page.publisher['@id'], origin + '/#organization');
+  assert.equal(page.breadcrumb['@id'], breadcrumbs['@id']);
+  assert.deepEqual(breadcrumbs.itemListElement.map(item => item.item), [origin + '/', origin + '/portfolio/']);
+  assert.equal(page.mainEntity['@type'], 'ItemList');
+  assert.equal(page.mainEntity.numberOfItems, cards.length);
+  assert.deepEqual(page.mainEntity.itemListElement, cards.map((card, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: card[2].match(/<h2 class="h3">([^<]+)<\/h2>/)[1],
+    url: origin + '/portfolio/#' + card[1]
+  })));
+});
+
+test('public content remains open to conventional and AI search crawlers', () => {
+  const robots = read('robots.txt');
+  const agents = [...robots.matchAll(/^User-agent:\s*(.+)$/gim)].map(match => match[1].trim());
+  assert.deepEqual(agents, ['*']);
+  assert.match(robots, /^Allow:\s*\/\s*$/im);
+  assert.doesNotMatch(robots, /^Disallow:[^\S\r\n]*\S+/im);
+  const sitemaps = [...robots.matchAll(/^Sitemap:\s*(.+)$/gim)].map(match => match[1].trim());
+  assert.deepEqual(sitemaps, [origin + '/sitemap.xml']);
+});
 
 test('short service-first homepage without duplicate portfolio cards', () => {
   const html = read('index.html');
@@ -106,8 +208,15 @@ test('shared assets use one cache version on both pages', () => {
 });
 
 test('sitemap includes only deployed pages and site verification remains intact', () => {
-  const urls = [...read('sitemap.xml').matchAll(/<loc>(.*?)<\/loc>/g)].map(m => m[1]);
+  const sitemap = read('sitemap.xml');
+  const urls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(m => m[1]);
   assert.deepEqual(urls, ['https://sumoaisolutions.com/', 'https://sumoaisolutions.com/portfolio/']);
+  const dates = [...sitemap.matchAll(/<lastmod>(.*?)<\/lastmod>/g)].map(m => m[1]);
+  assert.equal(dates.length, urls.length);
+  for (const date of dates) {
+    assert.match(date, /^\d{4}-\d{2}-\d{2}$/);
+    assert.ok(Date.parse(date) <= Date.now(), 'Sitemap lastmod must not be in the future');
+  }
   assert.equal(read('googlebb0f81e2e8e23f9a.html').trim(), 'google-site-verification: googlebb0f81e2e8e23f9a.html');
   assert.ok(read('script.js').includes('AW-17948229197/VZTvCKPwzogcEM38sO5C'));
 });
